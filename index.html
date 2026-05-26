@@ -417,9 +417,14 @@
         var weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
         var calYear, calMonth, calSelectedDate = null;
 
-        // ===== Theme Colors =====
+        // ===== Theme Colors (含莫兰迪色卡 3、5、7、12、20) =====
         var themeColors = [
             { id: 'purple', name: '默认紫', primary: '#7c3aed', dark: '#4f46e5', light: '#f3e8ff', bg: '#f0f2ff', rgb: '124,58,237' },
+            { id: 'smoky-blue', name: '煙灰藍', primary: '#6e7c87', dark: '#566a76', light: '#eef1f2', bg: '#e4e7e8', rgb: '110,124,135' },
+            { id: 'soft-terracotta', name: '柔和陶土', primary: '#c19a8b', dark: '#a57d6e', light: '#f8f0ed', bg: '#f3edea', rgb: '193,154,139' },
+            { id: 'creamy-apricot', name: '奶油杏', primary: '#e2c1ad', dark: '#c9a48e', light: '#fdf8f5', bg: '#faf3ef', rgb: '226,193,173' },
+            { id: 'withered-rose', name: '枯玫瑰', primary: '#ad8e8e', dark: '#917373', light: '#f8f0f0', bg: '#f0e6e6', rgb: '173,142,142' },
+            { id: 'linen-gray', name: '亞麻灰', primary: '#b7b5ac', dark: '#9a9890', light: '#f6f6f4', bg: '#f1f1ee', rgb: '183,181,172' },
             { id: 'blue', name: '雾霾蓝', primary: '#7B9BA6', dark: '#5E8290', light: '#e8f2f5', bg: '#f0f5f7', rgb: '123,155,166' },
             { id: 'pink', name: '豆沙粉', primary: '#B07B7B', dark: '#956060', light: '#f9f0f0', bg: '#f8f2f2', rgb: '176,123,123' },
             { id: 'peach', name: '蜜桃色', primary: '#C4907A', dark: '#A8735E', light: '#faf0eb', bg: '#f9f4f0', rgb: '196,144,122' },
@@ -438,7 +443,7 @@
             for (var i = 0; i < themeColors.length; i++) {
                 var t = themeColors[i];
                 var isActive = t.id === currentTheme ? ' active' : '';
-                html += '<div class="theme-card' + isActive + '" onclick="applyTheme(\'' + t.id + '\')">';
+                html += '<div class="theme-card' + isActive + '" onclick="applyTheme(\'' + t.id + '\', this)">';
                 html += '<div class="theme-color-preview" style="background:linear-gradient(135deg, ' + t.primary + ', ' + t.dark + ');"></div>';
                 html += '<span>' + t.name + '</span>';
                 html += '</div>';
@@ -451,7 +456,7 @@
             document.getElementById('theme-modal').classList.remove('active');
         }
 
-        function applyTheme(themeId) {
+        function applyTheme(themeId, el) {
             var theme = themeColors.find(function(t) { return t.id === themeId; });
             if (!theme) return;
 
@@ -473,7 +478,7 @@
             // Update active card
             var cards = document.querySelectorAll('.theme-card');
             for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
-            event.currentTarget.classList.add('active');
+            if (el) el.classList.add('active');
 
             setTimeout(function() {
                 document.body.classList.remove('theme-transitioning');
