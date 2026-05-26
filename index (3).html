@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>我的日记</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background: #f0f2ff; min-height: 100vh; min-height: 100dvh; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); overscroll-behavior: none; }
+        body.theme-transitioning, body.theme-transitioning *, body.theme-transitioning *::before, body.theme-transitioning *::after { transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease !important; }
+        body.dark { background: #1a1a1a; color: #d4d4d4; }
+        body.dark .diary-card { background: #2a2a2a; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        body.dark .diary-card p { color: #c8c8c8 !important; }
+        body.dark .diary-card .date-text { color: #999 !important; }
+        body.dark .header { background: linear-gradient(135deg, #4a1d96, #312e81); }
+        body.dark .tab-bar { background: #1f1f1f; border-bottom-color: #333; }
+        body.dark .tab { color: #888; }
+        body.dark .tab.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+        body.dark .modal-content { background: #2a2a2a; color: #d4d4d4; }
+        body.dark .modal-content h2 { color: #e0e0e0; }
+        body.dark .modal-content p { color: #999 !important; }
+        body.dark .view-content { color: #d4d4d4 !important; }
+        body.dark textarea { background: #333; border-color: #444; color: #d4d4d4; }
+        body.dark textarea:focus { border-color: #7c3aed; }
+        body.dark .mood-btn { background: #333; border-color: #444; }
+        body.dark .mood-btn.selected { border-color: #7c3aed; background: #3d2a5c; }
+        body.dark .popup-menu { background: #333; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+        body.dark .popup-menu-item { color: #d4d4d4; }
+        body.dark .popup-menu-item:hover { background: #3a3a3a; }
+        body.dark .popup-menu-item:not(:last-child) { border-bottom-color: #444; }
+        body.dark .popup-menu-item.danger { color: #f87171; }
+        body.dark .more-btn { color: #777; }
+        body.dark .more-btn:hover { background: #3a3a3a; color: #aaa; }
+        body.dark .empty-state { color: #666; }
+        body.dark .cancel-btn { border-color: #444; color: #d4d4d4; }
+        body.dark .trash-info { color: #666 !important; }
+        body.dark .trash-empty-btn { background: #3a2020; color: #f87171; }
+        body.dark .restore-btn { background: #1a3a2a; color: #6ee7b7; }
+        body.dark .perm-delete-btn { background: #3a2020; color: #f87171; }
+        body.dark .days-left { color: #666 !important; }
+        body.dark .search-box { background: #333; border-color: #444; color: #d4d4d4; }
+        body.dark .search-box:focus { border-color: #7c3aed; }
+        body.dark .search-wrapper { background: #1a1a1a; }
+        body.dark .view-date { color: #999 !important; }
+        body.dark .confirm-modal-box { background: #2a2a2a; color: #d4d4d4; }
+        body.dark .confirm-cancel { background: #333; color: #d4d4d4; }
+        body.dark .lock-screen { background: #1a1a1a; }
+        body.dark .lock-box { background: #2a2a2a; }
+        body.dark .lock-input { background: #333; border-color: #444; color: #d4d4d4; }
+        body.dark .lock-input:focus { border-color: #7c3aed; }
+        body.dark .calendar-wrapper { background: #1a1a1a; }
+        body.dark .cal-header { color: #d4d4d4; }
+        body.dark .cal-weekday { color: #888; }
+        body.dark .cal-day { color: #d4d4d4; }
+        body.dark .cal-day:hover { background: #333; }
+        body.dark .cal-day.today { background: #3d2a5c; color: #a78bfa; }
+        body.dark .cal-day.has-diary { background: #2d1f5e; }
+        body.dark .cal-day.has-diary::after { background: #a78bfa; }
+        body.dark .cal-day.selected { background: #4c1d95 !important; color: white; }
+        body.dark .cal-day.other-month { color: #555; }
+        body.dark .settings-menu { background: #333; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+        body.dark .settings-item { color: #d4d4d4; }
+        body.dark .settings-item:hover { background: #3a3a3a; }
+        body.dark .settings-item:not(:last-child) { border-bottom-color: #444; }
+        body.dark .header-dots:hover { background: rgba(255,255,255,0.15); }
+        .diary-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; position: relative; }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; font-size: 32px; border: none; box-shadow: 0 4px 15px rgba(124,58,237,0.4); cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .mood-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; background: white; }
+        .mood-btn.selected { border-color: #7c3aed; background: #f3e8ff; }
+        textarea { width: 100% !important; border: 1px solid #e5e7eb !important; border-radius: 12px !important; padding: 8px 10px !important; font-size: 16px !important; resize: none !important; outline: none !important; min-height: 150px !important; line-height: 1.4 !important; }
+        textarea:focus { border-color: #7c3aed !important; }
+        .save-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; margin-top: 12px; }
+        .header { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; padding: 16px 20px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+        .action-btn { font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: none; }
+        .restore-btn { color: #10b981; background: #ecfdf5; }
+        .perm-delete-btn { color: #ef4444; background: #fef2f2; }
+        .tab-bar { display: flex; background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 56px; z-index: 9; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; user-select: none; }
+        .tab.active { color: #7c3aed; border-bottom-color: #7c3aed; font-weight: 600; }
+        .more-btn { background: none; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; padding: 8px 12px; border-radius: 8px; letter-spacing: 2px; }
+        .more-btn:hover { background: #f3f4f6; color: #6b7280; }
+        .popup-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); overflow: hidden; z-index: 999; min-width: 130px; }
+        .popup-menu.show { display: block; }
+        .popup-menu-item { display: block; padding: 14px 20px; font-size: 15px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; color: #374151; }
+        .popup-menu-item:hover { background: #f9fafb; }
+        .popup-menu-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
+        .popup-menu-item.danger { color: #ef4444; }
+        .menu-wrapper { position: relative; display: inline-block; }
+        .theme-toggle { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 4px; border-radius: 8px; }
+        .search-wrapper { padding: 12px 16px; background: #f0f2ff; position: sticky; top: 100px; z-index: 8; }
+        .search-box { width: 100%; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; outline: none; background: white; }
+        .search-box:focus { border-color: #7c3aed; }
+        .view-content { font-size: 16px; line-height: 1.4; color: #374151; white-space: pre-wrap; word-break: break-word; }
+        .confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
+        .confirm-modal.active { display: flex; }
+        .confirm-modal-box { background: white; border-radius: 16px; padding: 24px; width: 80%; max-width: 320px; text-align: center; }
+        .confirm-modal-box p { font-size: 16px; margin-bottom: 20px; color: #374151; }
+        .confirm-btns { display: flex; gap: 12px; }
+        .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #f3f4f6; color: #374151; }
+        .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #ef4444; color: white; }
+        .lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .lock-screen.hidden { display: none; }
+        .lock-box { background: white; border-radius: 20px; padding: 32px; width: 85%; max-width: 360px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .lock-icon { font-size: 48px; margin-bottom: 16px; }
+        .lock-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #374151; }
+        .lock-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 24px; }
+        .lock-input { width: 100%; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 16px; outline: none; text-align: center; letter-spacing: 8px; margin-bottom: 16px; }
+        .lock-input:focus { border-color: #7c3aed; }
+        .lock-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; }
+        .lock-error { color: #ef4444; font-size: 13px; margin-top: 8px; min-height: 20px; }
+        .lock-skip { margin-top: 16px; font-size: 13px; color: #9ca3af; cursor: pointer; background: none; border: none; }
+        .header-dots { background: none; border: none; color: white; cursor: pointer; padding: 6px 10px; border-radius: 8px; font-size: 18px; }
+        .header-dots:hover { background: rgba(255,255,255,0.2); }
+        .settings-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); overflow: hidden; z-index: 999; min-width: 160px; }
+        .settings-menu.show { display: block; }
+        .settings-item { display: block; padding: 14px 20px; font-size: 14px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; color: #374151; white-space: nowrap; }
+        .settings-item:hover { background: #f9fafb; }
+        .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
+        .calendar-wrapper { padding: 16px; background: #f0f2ff; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 8px; }
+        .cal-header span { font-size: 17px; font-weight: 600; color: #374151; }
+        .cal-nav { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px 12px; border-radius: 8px; color: #7c3aed; }
+        .cal-nav:hover { background: rgba(124,58,237,0.1); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-weekday { text-align: center; font-size: 12px; color: #9ca3af; padding: 8px 0; font-weight: 500; }
+        .cal-day { text-align: center; padding: 10px 0; border-radius: 10px; font-size: 14px; cursor: pointer; position: relative; color: #374151; }
+        .cal-day:hover { background: #f3e8ff; }
+        .cal-day.today { background: #ede9fe; color: #7c3aed; font-weight: 600; }
+        .cal-day.has-diary::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: #7c3aed; }
+        .cal-day.selected { background: #7c3aed !important; color: white !important; }
+        .cal-day.selected::after { background: white !important; }
+        .cal-day.other-month { color: #d1d5db; }
+        .cal-day-list { padding: 0 16px 100px; }
+        .cal-day-title { font-size: 14px; color: #6b7280; margin-bottom: 12px; padding: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="lock-screen" id="lock-screen">
+        <div class="lock-box">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-title" id="lock-title">设置密码</div>
+            <div class="lock-subtitle" id="lock-subtitle">设置一个4-8位数字密码保护你的日记</div>
+            <input type="password" class="lock-input" id="lock-input" maxlength="8" placeholder="••••" inputmode="numeric">
+            <button class="lock-btn" id="lock-btn" onclick="handleLock()">确定</button>
+            <div class="lock-error" id="lock-error"></div>
+            <button class="lock-skip" id="lock-skip" onclick="skipLock()">暂不设置</button>
+        </div>
+    </div>
+    <div class="header">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <h1>我的日记</h1>
+        <div style="position:relative;">
+            <button class="header-dots" id="settings-btn" onclick="toggleSettings(event)">⚙️</button>
+            <div class="settings-menu" id="settings-menu">
+                <button class="settings-item" onclick="exportData()">📤 导出备份</button>
+                <button class="settings-item" onclick="document.getElementById('import-file').click()">📥 导入恢复</button>
+                <button class="settings-item" onclick="changePassword()">🔑 修改密码</button>
+                <button class="settings-item" onclick="removeLock()">🔓 关闭密码锁</button>
+            </div>
+        </div>
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+    </div>
+    <div class="tab-bar">
+        <div class="tab active" id="tab-diary" onclick="switchTab('diary')">📝 日记</div>
+        <div class="tab" id="tab-calendar" onclick="switchTab('calendar')">📅 日历</div>
+        <div class="tab" id="tab-trash" onclick="switchTab('trash')">🗑️ 回收站</div>
+    </div>
+    <div id="diary-page">
+        <div class="search-wrapper"><input type="text" class="search-box" id="search-box" placeholder="🔍 搜索日记内容..." oninput="renderDiaries()"></div>
+        <div style="padding: 0 16px 100px;"><div id="diary-list"></div></div>
+    </div>
+    <div id="calendar-page" style="display:none;">
+        <div class="calendar-wrapper">
+            <div class="cal-header"><button class="cal-nav" onclick="calNav(-1)">‹</button><span id="cal-month-title"></span><button class="cal-nav" onclick="calNav(1)">›</button></div>
+            <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="cal-day-list"><div class="cal-day-title" id="cal-day-title"></div><div id="cal-day-diaries"></div></div>
+    </div>
+    <div id="trash-page" style="padding: 16px 16px 100px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <p class="trash-info" style="font-size:13px; color:#9ca3af;">删除的日记将保留30天</p>
+            <button class="trash-empty-btn" onclick="showConfirm('确定清空回收站？',emptyTrash)" style="font-size:12px; color:#ef4444; background:#fef2f2; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">清空回收站</button>
+        </div>
+        <div id="trash-list"></div>
+    </div>
+    <button class="fab" id="fab-btn" onclick="openModal()">+</button>
+    <div class="confirm-modal" id="confirm-modal"><div class="confirm-modal-box"><p id="confirm-msg">确定删除？</p><div class="confirm-btns"><button class="confirm-cancel" onclick="hideConfirm()">取消</button><button class="confirm-ok" id="confirm-ok-btn" onclick="confirmAction()">确定</button></div></div></div>
+    <div class="modal" id="view-modal" onclick="if(event.target===this)closeViewModal()"><div class="modal-content"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><span class="view-date" id="view-date" style="font-size:14px; color:#6b7280;"></span><span id="view-mood" style="font-size:24px;"></span></div><div class="view-content" id="view-content"></div><button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:20px;" onclick="closeViewModal()">关闭</button></div></div>
+    <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="modal-content"><h2 style="font-size:18px; font-weight:600; margin-bottom:16px;" id="modal-title">写日记</h2><p style="font-size:14px; color:#6b7280; margin-bottom:8px;">今天心情如何？</p><div style="display:flex; gap:10px; margin-bottom:16px;"><button class="mood-btn" onclick="selectMood(this,'😊')">😊</button><button class="mood-btn" onclick="selectMood(this,'😢')">😢</button><button class="mood-btn" onclick="selectMood(this,'😡')">😡</button><button class="mood-btn" onclick="selectMood(this,'😴')">😴</button><button class="mood-btn" onclick="selectMood(this,'🥰')">🥰</button><button class="mood-btn" onclick="selectMood(this,'😎')">😎</button></div><textarea id="diary-content" placeholder="今天发生了什么..."></textarea><button class="save-btn" id="save-btn" onclick="saveDiary()">保存日记</button><button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closeModal()">取消</button></div></div>
+    <div class="modal" id="pwd-modal" onclick="if(event.target===this)closePwdModal()"><div class="modal-content" style="text-align:center;"><h2 style="font-size:18px; font-weight:600; margin-bottom:8px;">修改密码</h2><p style="font-size:14px; color:#9ca3af; margin-bottom:20px;">请输入新的4-8位数字密码</p><input type="password" class="lock-input" id="new-pwd-input" maxlength="8" placeholder="••••" inputmode="numeric" style="margin-bottom:12px;"><input type="password" class="lock-input" id="new-pwd-confirm" maxlength="8" placeholder="确认密码" inputmode="numeric" style="margin-bottom:4px;"><div class="lock-error" id="pwd-error"></div><button class="save-btn" onclick="saveNewPassword()" style="margin-top:12px;">保存密码</button><button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closePwdModal()">取消</button></div></div>
+    <script>
+        var selectedMood='';var editingId=null;var confirmCallback=null;var weekDays=['周日','周一','周二','周三','周四','周五','周六'];var calYear,calMonth,calSelectedDate=null;
+        (function initLock(){var pwd=localStorage.getItem('diary_password');var lockDisabled=localStorage.getItem('diary_lock_disabled');var lockScreen=document.getElementById('lock-screen');if(lockDisabled==='true'){lockScreen.classList.add('hidden');return;}if(!pwd){document.getElementById('lock-title').textContent='设置密码';document.getElementById('lock-subtitle').textContent='设置一个4-8位数字密码保护你的日记';document.getElementById('lock-btn').textContent='设置密码';document.getElementById('lock-skip').style.display='inline';}else{document.getElementById('lock-title').textContent='请输入密码';document.getElementById('lock-subtitle').textContent='输入密码解锁你的日记';document.getElementById('lock-btn').textContent='解锁';document.getElementById('lock-skip').style.display='none';}})();
+        function handleLock(){var input=document.getElementById('lock-input');var val=input.value.trim();var pwd=localStorage.getItem('diary_password');var errorEl=document.getElementById('lock-error');if(!pwd){if(val.length<4){errorEl.textContent='密码至少4位';return;}if(!/^\d+$/.test(val)){errorEl.textContent='请输入纯数字密码';return;}localStorage.setItem('diary_password',val);localStorage.removeItem('diary_lock_disabled');document.getElementById('lock-screen').classList.add('hidden');}else{if(val===pwd){document.getElementById('lock-screen').classList.add('hidden');}else{errorEl.textContent='密码错误';input.value='';}}}
+        function skipLock(){localStorage.setItem('diary_lock_disabled','true');document.getElementById('lock-screen').classList.add('hidden');}
+        document.getElementById('lock-input').addEventListener('keydown',function(e){if(e.key==='Enter')handleLock();});
+        function changePassword(){closeSettings();document.getElementById('new-pwd-input').value='';document.getElementById('new-pwd-confirm').value='';document.getElementById('pwd-error').textContent='';document.getElementById('pwd-modal').classList.add('active');}
+        function closePwdModal(){document.getElementById('pwd-modal').classList.remove('active');}
+        function saveNewPassword(){var pwd=document.getElementById('new-pwd-input').value.trim();var confirm=document.getElementById('new-pwd-confirm').value.trim();var errorEl=document.getElementById('pwd-error');if(pwd.length<4){errorEl.textContent='密码至少4位';return;}if(!/^\d+$/.test(pwd)){errorEl.textContent='请输入纯数字密码';return;}if(pwd!==confirm){errorEl.textContent='两次密码不一致';return;}localStorage.setItem('diary_password',pwd);localStorage.removeItem('diary_lock_disabled');closePwdModal();}
+        function removeLock(){closeSettings();showConfirm('确定关闭密码锁？',function(){localStorage.removeItem('diary_password');localStorage.setItem('diary_lock_disabled','true');});}
+        function toggleSettings(e){e.stopPropagation();document.getElementById('settings-menu').classList.toggle('show');}
+        function closeSettings(){document.getElementById('settings-menu').classList.remove('show');}
+        function exportData(){closeSettings();var data={diaries:JSON.parse(localStorage.getItem('diaries')||'[]'),trash:JSON.parse(localStorage.getItem('trash')||'[]'),exportDate:new Date().toISOString()};var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='日记备份_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);}
+        function importData(event){closeSettings();var file=event.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){try{var data=JSON.parse(e.target.result);if(!data.diaries)return;showConfirm('导入将覆盖当前数据，确定？',function(){localStorage.setItem('diaries',JSON.stringify(data.diaries));if(data.trash)localStorage.setItem('trash',JSON.stringify(data.trash));renderDiaries();});}catch(err){}};reader.readAsText(file);event.target.value='';}
+        function toggleTheme(){document.body.classList.add('theme-transitioning');var isDark=document.body.classList.toggle('dark');localStorage.setItem('theme',isDark?'dark':'light');document.getElementById('theme-toggle').textContent=isDark?'☀️':'🌙';setTimeout(function(){document.body.classList.remove('theme-transitioning');},450);}
+        (function(){if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');document.getElementById('theme-toggle').textContent='☀️';}})();
+        function showConfirm(msg,callback){document.getElementById('confirm-msg').textContent=msg;document.getElementById('confirm-modal').classList.add('active');confirmCallback=callback;}
+        function hideConfirm(){document.getElementById('confirm-modal').classList.remove('active');}
+        function confirmAction(){var cb=confirmCallback;confirmCallback=null;hideConfirm();if(cb)cb();}
+        function getWeekDay(dateStr){return weekDays[new Date(dateStr).getDay()];}
+        function switchTab(tab){document.getElementById('tab-diary').classList.toggle('active',tab==='diary');document.getElementById('tab-calendar').classList.toggle('active',tab==='calendar');document.getElementById('tab-trash').classList.toggle('active',tab==='trash');document.getElementById('diary-page').style.display=tab==='diary'?'block':'none';document.getElementById('calendar-page').style.display=tab==='calendar'?'block':'none';document.getElementById('trash-page').style.display=tab==='trash'?'block':'none';document.getElementById('fab-btn').style.display=(tab==='diary'||tab==='calendar')?'flex':'none';if(tab==='trash')renderTrash();if(tab==='calendar')renderCalendar();}
+        (function(){var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();})();
+        function calNav(dir){calMonth+=dir;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}calSelectedDate=null;renderCalendar();}
+        function renderCalendar(){var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var diaryDates={};diaries.forEach(function(d){diaryDates[d.date]=true;});document.getElementById('cal-month-title').textContent=calYear+'年'+(calMonth+1)+'月';var firstDay=new Date(calYear,calMonth,1).getDay();var daysInMonth=new Date(calYear,calMonth+1,0).getDate();var daysInPrevMonth=new Date(calYear,calMonth,0).getDate();var today=new Date();var todayStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');var html='';var wk=['日','一','二','三','四','五','六'];for(var i=0;i<7;i++)html+='<div class="cal-weekday">'+wk[i]+'</div>';for(var i=firstDay-1;i>=0;i--)html+='<div class="cal-day other-month">'+(daysInPrevMonth-i)+'</div>';for(var d=1;d<=daysInMonth;d++){var dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');var cls='cal-day';if(dateStr===todayStr)cls+=' today';if(diaryDates[dateStr])cls+=' has-diary';if(dateStr===calSelectedDate)cls+=' selected';html+='<div class="'+cls+'" onclick="selectCalDate(\''+dateStr+'\')">'+d+'</div>';}var total=firstDay+daysInMonth;var rem=(7-total%7)%7;for(var i=1;i<=rem;i++)html+='<div class="cal-day other-month">'+i+'</div>';document.getElementById('cal-grid').innerHTML=html;renderCalDayDiaries();}
+        function selectCalDate(dateStr){calSelectedDate=calSelectedDate===dateStr?null:dateStr;renderCalendar();}
+        function renderCalDayDiaries(){var titleEl=document.getElementById('cal-day-title');var listEl=document.getElementById('cal-day-diaries');var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');if(!calSelectedDate){var monthStr=calYear+'-'+String(calMonth+1).padStart(2,'0');var md=diaries.filter(function(d){return d.date.startsWith(monthStr);});titleEl.textContent='本月共 '+md.length+' 篇日记';if(!md.length){listEl.innerHTML='<div class="empty-state"><p style="font-size:36px;margin-bottom:12px;">📅</p><p>本月暂无日记</p></div>';return;}var html='';md.forEach(function(d){var preview=d.content.length>60?d.content.substring(0,60)+'...':d.content;html+='<div class="diary-card" onclick="viewDiary('+d.id+')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span class="date-text" style="font-size:13px;color:#6b7280;">'+d.date+' '+getWeekDay(d.date)+' '+d.time+'</span>'+(d.mood?'<span style="font-size:18px;">'+d.mood+'</span>':'')+'</div><p style="font-size:14px;line-height:1.4;color:#374151;white-space:pre-wrap;">'+escapeHtml(preview)+'</p></div>';});listEl.innerHTML=html;}else{var dd=diaries.filter(function(d){return d.date===calSelectedDate;});titleEl.textContent=calSelectedDate+' '+getWeekDay(calSelectedDate)+' ('+dd.length+'篇)';if(!dd.length){listEl.innerHTML='<div class="empty-state"><p style="font-size:36px;margin-bottom:12px;">📝</p><p>这一天没有日记</p></div>';return;}var html='';dd.forEach(function(d){html+='<div class="diary-card" onclick="viewDiary('+d.id+')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span class="date-text" style="font-size:13px;color:#6b7280;">'+d.time+'</span>'+(d.mood?'<span style="font-size:18px;">'+d.mood+'</span>':'')+'</div><p style="font-size:14px;line-height:1.4;color:#374151;white-space:pre-wrap;">'+escapeHtml(d.content)+'</p></div>';});listEl.innerHTML=html;}}
+        document.addEventListener('click',function(e){if(!e.target.closest('#settings-btn')&&!e.target.closest('#settings-menu'))closeSettings();closeAllMenus();});
+        function closeAllMenus(){var m=document.querySelectorAll('.popup-menu.show');for(var i=0;i<m.length;i++)m[i].classList.remove('show');}
+        function viewDiary(id){var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var item=diaries.find(function(d){return d.id===id;});if(!item)return;document.getElementById('view-date').textContent=item.date+' '+getWeekDay(item.date)+' '+item.time;document.getElementById('view-mood').textContent=item.mood||'';document.getElementById('view-content').textContent=item.content;document.getElementById('view-modal').classList.add('active');}
+        function closeViewModal(){document.getElementById('view-modal').classList.remove('active');}
+        function openModal(){editingId=null;document.getElementById('modal-title').textContent='写日记';document.getElementById('save-btn').textContent='保存日记';document.getElementById('diary-content').value='';selectedMood='';var btns=document.querySelectorAll('.mood-btn');for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');document.getElementById('modal').classList.add('active');}
+        function openEditModal(id){var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var item=diaries.find(function(d){return d.id===id;});if(!item)return;editingId=id;document.getElementById('modal-title').textContent='编辑日记';document.getElementById('save-btn').textContent='保存修改';document.getElementById('diary-content').value=item.content;selectedMood=item.mood||'';var btns=document.querySelectorAll('.mood-btn');for(var i=0;i<btns.length;i++){btns[i].classList.remove('selected');if(item.mood&&btns[i].textContent===item.mood)btns[i].classList.add('selected');}document.getElementById('modal').classList.add('active');}
+        function closeModal(){document.getElementById('modal').classList.remove('active');editingId=null;}
+        function selectMood(btn,mood){if(selectedMood===mood){selectedMood='';btn.classList.remove('selected');return;}selectedMood=mood;var btns=document.querySelectorAll('.mood-btn');for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');btn.classList.add('selected');}
+        function saveDiary(){var content=document.getElementById('diary-content').value.trim();if(!content)return;var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');if(editingId){var item=diaries.find(function(d){return d.id===editingId;});if(item){item.content=content;item.mood=selectedMood;}}else{var now=new Date();diaries.unshift({id:Date.now(),date:now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),time:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),mood:selectedMood,content:content});}localStorage.setItem('diaries',JSON.stringify(diaries));closeModal();renderDiaries();if(document.getElementById('calendar-page').style.display!=='none')renderCalendar();}
+        function deleteDiary(id){showConfirm('确定移入回收站？',function(){var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var trash=JSON.parse(localStorage.getItem('trash')||'[]');var item=diaries.find(function(d){return d.id===id;});if(item){item.deletedAt=Date.now();trash.unshift(item);localStorage.setItem('trash',JSON.stringify(trash));}diaries=diaries.filter(function(d){return d.id!==id;});localStorage.setItem('diaries',JSON.stringify(diaries));renderDiaries();});}
+        function restoreDiary(id){var trash=JSON.parse(localStorage.getItem('trash')||'[]');var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var item=trash.find(function(d){return d.id===id;});if(item){delete item.deletedAt;diaries.unshift(item);localStorage.setItem('diaries',JSON.stringify(diaries));}trash=trash.filter(function(d){return d.id!==id;});localStorage.setItem('trash',JSON.stringify(trash));renderTrash();}
+        function permDelete(id){showConfirm('永久删除？不可恢复！',function(){var trash=JSON.parse(localStorage.getItem('trash')||'[]');trash=trash.filter(function(d){return d.id!==id;});localStorage.setItem('trash',JSON.stringify(trash));renderTrash();});}
+        function emptyTrash(){localStorage.setItem('trash','[]');renderTrash();}
+        function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+        function renderDiaries(){var diaries=JSON.parse(localStorage.getItem('diaries')||'[]');var q=document.getElementById('search-box').value.trim().toLowerCase();if(q)diaries=diaries.filter(function(d){return d.content.toLowerCase().indexOf(q)!==-1||d.date.indexOf(q)!==-1;});var list=document.getElementById('diary-list');if(!diaries.length){list.innerHTML='<div class="empty-state"><p style="font-size:48px;margin-bottom:16px;">'+(q?'🔍':'📝')+'</p><p style="font-size:16px;">'+(q?'没有找到相关日记':'还没有日记')+'</p>'+(q?'':'<p style="font-size:14px;margin-top:8px;">点击右下角 + 开始写第一篇吧</p>')+'</div>';return;}var html='';for(var i=0;i<diaries.length;i++){var d=diaries[i];var preview=d.content.length>80?d.content.substring(0,80)+'...':d.content;html+='<div class="diary-card" data-id="'+d.id+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="date-text" style="font-size:14px;color:#6b7280;">'+d.date+' '+getWeekDay(d.date)+' '+d.time+'</span>'+(d.mood?'<span style="font-size:20px;">'+d.mood+'</span>':'')+'</div><p style="font-size:15px;line-height:1.4;color:#374151;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">'+escapeHtml(preview)+'</p><div style="display:flex;justify-content:flex-end;margin-top:10px;"><div class="menu-wrapper"><button class="more-btn" data-menu="'+d.id+'">•••</button><div class="popup-menu" id="menu-'+d.id+'"><button class="popup-menu-item" data-action="edit" data-id="'+d.id+'">✏️ 编辑</button><button class="popup-menu-item danger" data-action="delete" data-id="'+d.id+'">🗑️ 删除</button></div></div></div></div>';}list.innerHTML=html;}
+        document.getElementById('diary-list').addEventListener('click',function(e){var target=e.target;if(target.classList.contains('more-btn')){e.stopPropagation();var menuId=target.getAttribute('data-menu');var menu=document.getElementById('menu-'+menuId);var isOpen=menu.classList.contains('show');closeAllMenus();if(!isOpen)menu.classList.add('show');return;}if(target.getAttribute('data-action')==='edit'){e.stopPropagation();closeAllMenus();openEditModal(Number(target.getAttribute('data-id')));return;}if(target.getAttribute('data-action')==='delete'){e.stopPropagation();closeAllMenus();deleteDiary(Number(target.getAttribute('data-id')));return;}var card=target.closest('.diary-card');if(card&&!target.closest('.menu-wrapper'))viewDiary(Number(card.getAttribute('data-id')));});
+        function renderTrash(){var trash=JSON.parse(localStorage.getItem('trash')||'[]');var list=document.getElementById('trash-list');if(!trash.length){list.innerHTML='<div class="empty-state"><p style="font-size:48px;margin-bottom:16px;">🗑️</p><p style="font-size:16px;">回收站是空的</p></div>';return;}var html='';for(var i=0;i<trash.length;i++){var d=trash[i];var daysLeft=30-Math.floor((Date.now()-d.deletedAt)/(24*60*60*1000));html+='<div class="diary-card" style="opacity:0.8;cursor:default;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="date-text" style="font-size:14px;color:#6b7280;">'+d.date+' '+getWeekDay(d.date)+' '+d.time+(d.mood?' '+d.mood:'')+'</span><span class="days-left" style="font-size:11px;color:#9ca3af;">'+daysLeft+'天后删除</span></div><p style="font-size:15px;line-height:1.4;color:#374151;margin-bottom:10px;white-space:pre-wrap;">'+escapeHtml(d.content)+'</p><div style="display:flex;gap:8px;justify-content:flex-end;"><button class="action-btn restore-btn" onclick="restoreDiary('+d.id+')">↩️ 恢复</button><button class="action-btn perm-delete-btn" onclick="permDelete('+d.id+')">永久删除</button></div></div>';}list.innerHTML=html;}
+        (function(){var trash=JSON.parse(localStorage.getItem('trash')||'[]');trash=trash.filter(function(d){return(Date.now()-d.deletedAt)<30*24*60*60*1000;});localStorage.setItem('trash',JSON.stringify(trash));})();
+        renderDiaries();
+    </script>
+</body>
+</html>
