@@ -172,6 +172,7 @@
         .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #f3f4f6; color: #374151; }
         .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #ef4444; color: white; }
 
+        /* Lock Screen */
         .lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--primary-bg); z-index: 9999; display: flex; align-items: center;
@@ -201,6 +202,7 @@
             background: none; border: none;
         }
 
+        /* Header dots button */
         .header-dots {
             background: none; border: none; color: white; cursor: pointer;
             padding: 6px 10px; border-radius: 8px; font-size: 18px; letter-spacing: 2px;
@@ -208,6 +210,7 @@
         }
         .header-dots:hover { background: rgba(255,255,255,0.2); }
 
+        /* Settings Menu */
         .settings-menu {
             display: none; position: absolute; top: 100%; right: 0; margin-top: 8px;
             background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
@@ -222,6 +225,7 @@
         .settings-item:hover { background: #f9fafb; }
         .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
 
+        /* Calendar */
         .calendar-wrapper {
             padding: 16px; background: var(--primary-bg);
         }
@@ -257,6 +261,7 @@
         .cal-day-list { padding: 0 16px 100px; }
         .cal-day-title { font-size: 14px; color: #6b7280; margin-bottom: 12px; padding: 8px 0; }
 
+        /* Theme Picker */
         .theme-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px;
         }
@@ -415,11 +420,11 @@
         // ===== Theme Colors =====
         var themeColors = [
             { id: 'purple', name: '默认紫', primary: '#7c3aed', dark: '#4f46e5', light: '#f3e8ff', bg: '#f0f2ff', rgb: '124,58,237' },
-            { id: 'smoky-blue', name: '煙灰藍', primary: '#6e7c87', dark: '#566a76', light: '#eef1f2', bg: '#f3f5f6', rgb: '110,124,135' },
-            { id: 'soft-terracotta', name: '柔和陶土', primary: '#c19a8b', dark: '#a57d6e', light: '#f8f0ed', bg: '#faf7f5', rgb: '193,154,139' },
-            { id: 'creamy-apricot', name: '奶油杏', primary: '#e2c1ad', dark: '#c9a48e', light: '#fdf8f5', bg: '#fdfaf8', rgb: '226,193,173' },
-            { id: 'withered-rose', name: '枯玫瑰', primary: '#ad8e8e', dark: '#917373', light: '#f8f0f0', bg: '#f9f4f4', rgb: '173,142,142' },
-            { id: 'linen-gray', name: '亞麻灰', primary: '#b7b5ac', dark: '#9a9890', light: '#f6f6f4', bg: '#f9f9f7', rgb: '183,181,172' },
+            { id: 'smoky-blue', name: '煙灰藍', primary: '#6e7c87', dark: '#566a76', light: '#eef1f2', bg: '#e4e7e8', rgb: '110,124,135' },
+            { id: 'soft-terracotta', name: '柔和陶土', primary: '#c19a8b', dark: '#a57d6e', light: '#f8f0ed', bg: '#f3edea', rgb: '193,154,139' },
+            { id: 'creamy-apricot', name: '奶油杏', primary: '#e2c1ad', dark: '#c9a48e', light: '#fdf8f5', bg: '#faf3ef', rgb: '226,193,173' },
+            { id: 'withered-rose', name: '枯玫瑰', primary: '#ad8e8e', dark: '#917373', light: '#f8f0f0', bg: '#f0e6e6', rgb: '173,142,142' },
+            { id: 'linen-gray', name: '亞麻灰', primary: '#b7b5ac', dark: '#9a9890', light: '#f6f6f4', bg: '#f1f1ee', rgb: '183,181,172' },
             { id: 'blue', name: '雾霾蓝', primary: '#7B9BA6', dark: '#5E8290', light: '#e8f2f5', bg: '#f0f5f7', rgb: '123,155,166' },
             { id: 'pink', name: '豆沙粉', primary: '#B07B7B', dark: '#956060', light: '#f9f0f0', bg: '#f8f2f2', rgb: '176,123,123' },
             { id: 'peach', name: '蜜桃色', primary: '#C4907A', dark: '#A8735E', light: '#faf0eb', bg: '#f9f4f0', rgb: '196,144,122' },
@@ -428,7 +433,8 @@
             { id: 'brown', name: '暖棕色', primary: '#A6938A', dark: '#8A7D74', light: '#f4f0ed', bg: '#f5f3f0', rgb: '166,147,138' },
             { id: 'sage', name: '鼠尾草绿', primary: '#96A08D', dark: '#7A8670', light: '#f0f3ed', bg: '#f3f5f0', rgb: '150,160,141' },
             { id: 'olive', name: '橄榄绿', primary: '#8A9579', dark: '#6E8064', light: '#eff2ec', bg: '#f2f5f0', rgb: '138,149,121' },
-            { id: 'bamboo', name: '竹青', primary: '#7E9485', dark: '#628070', light: '#edf2ee', bg: '#f0f4f1', rgb: '126,148,133' }
+            { id: 'bamboo', name: '竹青', primary: '#7E9485', dark: '#628070', light: '#edf2ee', bg: '#f0f4f1', rgb: '126,148,133' },
+            { id: 'mint', name: '薄荷绿', primary: '#7ECBA4', dark: '#5EAD86', light: '#edf8f2', bg: '#f0f9f4', rgb: '126,203,164' }
         ];
 
         function openThemePicker() {
