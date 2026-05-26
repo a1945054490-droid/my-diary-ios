@@ -1,1021 +1,1298 @@
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#7c3aed">
-<link rel="apple-touch-icon" href="icon.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script>
-
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="sage">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>我的日记</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CardNote">
+    <title>CardNote</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
+        /* ===== CSS Variables - Themes ===== */
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #4f46e5;
-            --primary-light: #f3e8ff;
-            --primary-bg: #f0f2ff;
-            --primary-rgb: 124, 58, 237;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body.theme-transitioning,
-        body.theme-transitioning *,
-        body.theme-transitioning *::before,
-        body.theme-transitioning *::after {
-            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease !important;
+        /* 鼠尾草 Sage */
+        [data-theme="sage"] {
+            --bg-primary: #F3F5F2;
+            --bg-card: #E6EBE4;
+            --accent: #8E9E87;
+            --accent-light: #B3BEAE;
+            --text-primary: #4A5248;
+            --text-secondary: #7A8576;
+            --border: #D2D9CE;
+            --tag-bg: #C5CEBF;
+            --btn-bg: #E6EBE4;
+            --btn-active: #D2D9CE;
+            --shadow: rgba(74, 82, 72, 0.06);
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--primary-bg); min-height: 100vh; }
-        
-        body.dark { background: #1a1a1a; color: #d4d4d4; }
-        body.dark .diary-card { background: #2a2a2a; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        body.dark .diary-card p { color: #c8c8c8 !important; }
-        body.dark .diary-card .date-text { color: #999 !important; }
-        body.dark .header { background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 70%, black), color-mix(in srgb, var(--primary-dark) 70%, black)); }
-        body.dark .tab-bar { background: #1f1f1f; border-bottom-color: #333; }
-        body.dark .tab { color: #888; }
-        body.dark .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        body.dark .modal-content { background: #2a2a2a; color: #d4d4d4; }
-        body.dark .modal-content h2 { color: #e0e0e0; }
-        body.dark .modal-content p { color: #999 !important; }
-        body.dark .view-content { color: #d4d4d4 !important; }
-        body.dark textarea { background: #333; border-color: #444; color: #d4d4d4; }
-        body.dark textarea:focus { border-color: var(--primary); }
-        body.dark .mood-btn { background: #333; border-color: #444; }
-        body.dark .mood-btn.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 20%, #333); }
-        body.dark .popup-menu { background: #333; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-        body.dark .popup-menu-item { color: #d4d4d4; }
-        body.dark .popup-menu-item:hover { background: #3a3a3a; }
-        body.dark .popup-menu-item:not(:last-child) { border-bottom-color: #444; }
-        body.dark .popup-menu-item.danger { color: #f87171; }
-        body.dark .more-btn { color: #777; }
-        body.dark .more-btn:hover { background: #3a3a3a; color: #aaa; }
-        body.dark .empty-state { color: #666; }
-        body.dark .cancel-btn { border-color: #444; color: #d4d4d4; }
-        body.dark .trash-info { color: #666 !important; }
-        body.dark .trash-empty-btn { background: #3a2020; color: #f87171; }
-        body.dark .restore-btn { background: #1a3a2a; color: #6ee7b7; }
-        body.dark .perm-delete-btn { background: #3a2020; color: #f87171; }
-        body.dark .days-left { color: #666 !important; }
-        body.dark .search-box { background: #333; border-color: #444; color: #d4d4d4; }
-        body.dark .search-box:focus { border-color: var(--primary); }
-        body.dark .search-wrapper { background: #1a1a1a; }
-        body.dark .view-date { color: #999 !important; }
-        body.dark .confirm-modal-box { background: #2a2a2a; color: #d4d4d4; }
-        body.dark .confirm-cancel { background: #333; color: #d4d4d4; }
-        body.dark .lock-screen { background: #1a1a1a; }
-        body.dark .lock-box { background: #2a2a2a; }
-        body.dark .lock-input { background: #333; border-color: #444; color: #d4d4d4; }
-        body.dark .lock-input:focus { border-color: var(--primary); }
-        body.dark .calendar-wrapper { background: #1a1a1a; }
-        body.dark .cal-header { color: #d4d4d4; }
-        body.dark .cal-weekday { color: #888; }
-        body.dark .cal-day { color: #d4d4d4; }
-        body.dark .cal-day:hover { background: #333; }
-        body.dark .cal-day.today { background: color-mix(in srgb, var(--primary) 25%, #333); color: var(--primary); }
-        body.dark .cal-day.has-diary { background: color-mix(in srgb, var(--primary) 20%, #222); }
-        body.dark .cal-day.has-diary::after { background: var(--primary); }
-        body.dark .cal-day.selected { background: var(--primary) !important; color: white; }
-        body.dark .cal-day.other-month { color: #555; }
-        body.dark .settings-menu { background: #333; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-        body.dark .settings-item { color: #d4d4d4; }
-        body.dark .settings-item:hover { background: #3a3a3a; }
-        body.dark .settings-item:not(:last-child) { border-bottom-color: #444; }
-        body.dark .header-dots:hover { background: rgba(255,255,255,0.15); }
-        body.dark .theme-card { border-color: #444; }
-        body.dark .theme-card span { color: #d4d4d4; }
-
-        .diary-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; position: relative; }
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 32px; border: none; box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.4); cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
-        .mood-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; background: white; }
-        .mood-btn.selected { border-color: var(--primary); background: var(--primary-light); }
-        textarea { 
-            width: 100% !important; 
-            border: 1px solid #e5e7eb !important; 
-            border-radius: 12px !important; 
-            padding: 8px 10px !important; 
-            font-size: 16px !important; 
-            resize: none !important; 
-            outline: none !important; 
-            min-height: 150px !important; 
-            text-indent: 0 !important; 
-            line-height: 1.4 !important; 
-        }
-        textarea:focus { border-color: var(--primary) !important; }
-        .save-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; margin-top: 12px; }
-        .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 16px 20px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 20px; font-weight: 600; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
-        .action-btn { font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: none; }
-        .restore-btn { color: #10b981; background: #ecfdf5; }
-        .perm-delete-btn { color: #ef4444; background: #fef2f2; }
-        .tab-bar { display: flex; background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 56px; z-index: 9; }
-        .tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-
-        .more-btn { 
-            background: none; border: none; font-size: 18px; color: #9ca3af; 
-            cursor: pointer; padding: 8px 12px; border-radius: 8px;
-            letter-spacing: 2px;
-        }
-        .more-btn:hover { background: #f3f4f6; color: #6b7280; }
-
-        .popup-menu {
-            display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
-            background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-            overflow: hidden; z-index: 999; min-width: 130px;
-        }
-        .popup-menu.show { display: block; }
-        .popup-menu-item {
-            display: block; padding: 14px 20px; font-size: 15px; cursor: pointer;
-            border: none; background: none; width: 100%; text-align: left; color: #374151;
-        }
-        .popup-menu-item:hover { background: #f9fafb; }
-        .popup-menu-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
-        .popup-menu-item.danger { color: #ef4444; }
-
-        .menu-wrapper { position: relative; display: inline-block; }
-
-        .theme-toggle {
-            background: none; border: none; color: white; font-size: 20px;
-            cursor: pointer; padding: 4px; border-radius: 8px;
+        /* 桉叶 Eucalyptus */
+        [data-theme="eucalyptus"] {
+            --bg-primary: #F1F4F3;
+            --bg-card: #E2E9E6;
+            --accent: #7A9B8E;
+            --accent-light: #A7BDB3;
+            --text-primary: #454F4B;
+            --text-secondary: #748A82;
+            --border: #CFD9D4;
+            --tag-bg: #BACCC5;
+            --btn-bg: #E2E9E6;
+            --btn-active: #CFD9D4;
+            --shadow: rgba(69, 79, 75, 0.06);
         }
 
-        .search-wrapper {
-            padding: 12px 16px; background: var(--primary-bg); position: sticky; top: 100px; z-index: 8;
+        /* 苔藓 Moss */
+        [data-theme="moss"] {
+            --bg-primary: #F2F3EF;
+            --bg-card: #E3E6DE;
+            --accent: #7E8E72;
+            --accent-light: #ABB6A0;
+            --text-primary: #484D43;
+            --text-secondary: #767E6E;
+            --border: #CED3C7;
+            --tag-bg: #BCC4B2;
+            --btn-bg: #E3E6DE;
+            --btn-active: #CED3C7;
+            --shadow: rgba(72, 77, 67, 0.06);
         }
-        .search-box {
-            width: 100%; padding: 10px 16px; border: 1px solid #e5e7eb;
-            border-radius: 12px; font-size: 14px; outline: none; background: white;
-        }
-        .search-box:focus { border-color: var(--primary); }
 
-        .view-content { font-size: 16px; line-height: 1.4; color: #374151; white-space: pre-wrap; word-break: break-word; }
-
-        .confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
-        .confirm-modal.active { display: flex; }
-        .confirm-modal-box { background: white; border-radius: 16px; padding: 24px; width: 80%; max-width: 320px; text-align: center; }
-        .confirm-modal-box p { font-size: 16px; margin-bottom: 20px; color: #374151; }
-        .confirm-btns { display: flex; gap: 12px; }
-        .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #f3f4f6; color: #374151; }
-        .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #ef4444; color: white; }
-
-        /* Lock Screen */
-        .lock-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--primary-bg); z-index: 9999; display: flex; align-items: center;
-            justify-content: center; flex-direction: column;
+        /* 竹青 Bamboo */
+        [data-theme="bamboo"] {
+            --bg-primary: #F0F3F1;
+            --bg-card: #E0E7E2;
+            --accent: #6E9483;
+            --accent-light: #9DB8AB;
+            --text-primary: #3F4E47;
+            --text-secondary: #6B7F75;
+            --border: #CBDAD2;
+            --tag-bg: #B0C5BA;
+            --btn-bg: #E0E7E2;
+            --btn-active: #CBDAD2;
+            --shadow: rgba(63, 78, 71, 0.06);
         }
-        .lock-screen.hidden { display: none; }
-        .lock-box {
-            background: white; border-radius: 20px; padding: 32px; width: 85%; max-width: 360px;
-            text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+        /* 暖棕 Linen（加灰调） */
+        [data-theme="linen"] {
+            --bg-primary: #F5F3F0;
+            --bg-card: #EBE7E3;
+            --accent: #A89990;
+            --accent-light: #C8BDB6;
+            --text-primary: #5C5350;
+            --text-secondary: #8A7F7A;
+            --border: #D9D2CC;
+            --tag-bg: #D4CBC4;
+            --btn-bg: #EBE7E3;
+            --btn-active: #D9D2CC;
+            --shadow: rgba(92, 83, 80, 0.06);
         }
-        .lock-icon { font-size: 48px; margin-bottom: 16px; }
-        .lock-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #374151; }
-        .lock-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 24px; }
-        .lock-input {
-            width: 100%; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px;
-            font-size: 16px; outline: none; text-align: center; letter-spacing: 8px;
+
+        /* 奶油 Cream（加灰调） */
+        [data-theme="cream"] {
+            --bg-primary: #F5F4F0;
+            --bg-card: #ECEAE3;
+            --accent: #B5AD9A;
+            --accent-light: #CEC8B8;
+            --text-primary: #5A5749;
+            --text-secondary: #8A8573;
+            --border: #DBD8CE;
+            --tag-bg: #D4CFBF;
+            --btn-bg: #ECEAE3;
+            --btn-active: #DBD8CE;
+            --shadow: rgba(90, 87, 73, 0.06);
+        }
+
+        /* 兰花紫 Orchid */
+        [data-theme="orchid"] {
+            --bg-primary: #F4F2F5;
+            --bg-card: #E9E5EC;
+            --accent: #9C8EA0;
+            --accent-light: #BEB4C2;
+            --text-primary: #524D55;
+            --text-secondary: #847D87;
+            --border: #D7D1DA;
+            --tag-bg: #CEC6D2;
+            --btn-bg: #E9E5EC;
+            --btn-active: #D7D1DA;
+            --shadow: rgba(82, 77, 85, 0.06);
+        }
+
+        /* 柔粉 Soft Red */
+        [data-theme="softred"] {
+            --bg-primary: #F5F2F2;
+            --bg-card: #ECE6E6;
+            --accent: #A88E8E;
+            --accent-light: #C8B5B5;
+            --text-primary: #5C4F4F;
+            --text-secondary: #8A7A7A;
+            --border: #D9CFCF;
+            --tag-bg: #D4C6C6;
+            --btn-bg: #ECE6E6;
+            --btn-active: #D9CFCF;
+            --shadow: rgba(92, 79, 79, 0.06);
+        }
+
+        /* 暖橙 Orange */
+        [data-theme="orange"] {
+            --bg-primary: #F5F3F0;
+            --bg-card: #EDEBE5;
+            --accent: #B09880;
+            --accent-light: #CCBDAA;
+            --text-primary: #584E43;
+            --text-secondary: #877A6C;
+            --border: #DBD5CB;
+            --tag-bg: #D1C8BA;
+            --btn-bg: #EDEBE5;
+            --btn-active: #DBD5CB;
+            --shadow: rgba(88, 78, 67, 0.06);
+        }
+
+        /* ===== Reset ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-primary);
+            padding: 16px 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: none;
+            background: var(--btn-bg);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:active {
+            transform: scale(0.92);
+            background: var(--btn-active);
+        }
+
+        .header-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ===== Tab Bar ===== */
+        .tab-bar {
+            display: flex;
+            padding: 0 20px;
+            gap: 6px;
             margin-bottom: 16px;
         }
-        .lock-input:focus { border-color: var(--primary); }
-        .lock-btn {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer;
-        }
-        .lock-error { color: #ef4444; font-size: 13px; margin-top: 8px; min-height: 20px; }
-        .lock-skip { 
-            margin-top: 16px; font-size: 13px; color: #9ca3af; cursor: pointer; 
-            background: none; border: none;
+
+        .tab-item {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: var(--btn-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Header dots button */
-        .header-dots {
-            background: none; border: none; color: white; cursor: pointer;
-            padding: 6px 10px; border-radius: 8px; font-size: 18px; letter-spacing: 2px;
-            font-weight: bold;
+        .tab-item.active {
+            background: var(--accent);
+            color: white;
         }
-        .header-dots:hover { background: rgba(255,255,255,0.2); }
 
-        /* Settings Menu */
-        .settings-menu {
-            display: none; position: absolute; top: 100%; right: 0; margin-top: 8px;
-            background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-            overflow: hidden; z-index: 999; min-width: 160px;
+        .tab-item:active {
+            transform: scale(0.95);
         }
-        .settings-menu.show { display: block; }
-        .settings-item {
-            display: block; padding: 14px 20px; font-size: 14px; cursor: pointer;
-            border: none; background: none; width: 100%; text-align: left; color: #374151;
-            white-space: nowrap;
-        }
-        .settings-item:hover { background: #f9fafb; }
-        .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
 
-        /* Calendar */
-        .calendar-wrapper {
-            padding: 16px; background: var(--primary-bg);
+        /* ===== Cards Container ===== */
+        .cards-container {
+            padding: 0 16px 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .cal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 16px; padding: 0 8px;
-        }
-        .cal-header span { font-size: 17px; font-weight: 600; color: #374151; }
-        .cal-nav {
-            background: none; border: none; font-size: 20px; cursor: pointer;
-            padding: 4px 12px; border-radius: 8px; color: var(--primary);
-        }
-        .cal-nav:hover { background: rgba(var(--primary-rgb), 0.1); }
-        .cal-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
-        }
-        .cal-weekday {
-            text-align: center; font-size: 12px; color: #9ca3af; padding: 8px 0; font-weight: 500;
-        }
-        .cal-day {
-            text-align: center; padding: 10px 0; border-radius: 10px; font-size: 14px;
-            cursor: pointer; position: relative; color: #374151;
-        }
-        .cal-day:hover { background: var(--primary-light); }
-        .cal-day.today { background: var(--primary-light); color: var(--primary); font-weight: 600; }
-        .cal-day.has-diary::after {
-            content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-            width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
-        }
-        .cal-day.selected { background: var(--primary) !important; color: white !important; }
-        .cal-day.selected::after { background: white !important; }
-        .cal-day.other-month { color: #d1d5db; }
-        .cal-day-list { padding: 0 16px 100px; }
-        .cal-day-title { font-size: 14px; color: #6b7280; margin-bottom: 12px; padding: 8px 0; }
 
-        /* Theme Picker */
+        /* ===== Note Card ===== */
+        .note-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .note-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 12px var(--shadow);
+        }
+
+        .note-card-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-card-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .note-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .note-card-tag {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            background: var(--tag-bg);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .note-card-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .note-card-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .note-card-actions svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* ===== Floating Action Button ===== */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 90;
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .fab svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        /* ===== Modal / Editor ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            width: 100%;
+            max-height: 90vh;
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            overflow-y: auto;
+        }
+
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--btn-bg);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-save {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-save:active {
+            transform: scale(0.95);
+        }
+
+        .editor-title {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .editor-title::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .editor-content {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 200px;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .editor-content::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .editor-tag-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .editor-tag-btn {
+            padding: 6px 14px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .editor-tag-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        /* ===== Settings Panel ===== */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .settings-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .settings-panel {
+            background: var(--bg-primary);
+            width: 100%;
+            max-height: 85vh;
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            overflow-y: auto;
+        }
+
+        .settings-overlay.show .settings-panel {
+            transform: translateY(0);
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .theme-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
         }
-        .theme-card {
-            border: 2px solid #e5e7eb; border-radius: 14px; padding: 16px 12px;
-            text-align: center; cursor: pointer; transition: all 0.2s;
+
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            border: 2px solid transparent;
         }
-        .theme-card:hover { transform: scale(1.03); }
-        .theme-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2); }
-        .theme-color-preview {
-            width: 100%; height: 40px; border-radius: 10px; margin-bottom: 8px;
+
+        .theme-option.active {
+            border-color: var(--accent);
+            background: var(--btn-bg);
         }
-        .theme-card span { font-size: 13px; font-weight: 500; color: #374151; }
+
+        .theme-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-swatch::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            opacity: 0.8;
+        }
+
+        .theme-name {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Theme swatches colors */
+        .swatch-sage { background: #E6EBE4; }
+        .swatch-sage::after { background: #8E9E87; }
+        .swatch-eucalyptus { background: #E2E9E6; }
+        .swatch-eucalyptus::after { background: #7A9B8E; }
+        .swatch-moss { background: #E3E6DE; }
+        .swatch-moss::after { background: #7E8E72; }
+        .swatch-bamboo { background: #E0E7E2; }
+        .swatch-bamboo::after { background: #6E9483; }
+        .swatch-linen { background: #EBE7E3; }
+        .swatch-linen::after { background: #A89990; }
+        .swatch-cream { background: #ECEAE3; }
+        .swatch-cream::after { background: #B5AD9A; }
+        .swatch-orchid { background: #E9E5EC; }
+        .swatch-orchid::after { background: #9C8EA0; }
+        .swatch-softred { background: #ECE6E6; }
+        .swatch-softred::after { background: #A88E8E; }
+        .swatch-orange { background: #EDEBE5; }
+        .swatch-orange::after { background: #B09880; }
+
+        /* ===== Search ===== */
+        .search-bar {
+            margin: 0 20px 16px;
+            display: none;
+        }
+
+        .search-bar.show {
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-card);
+            font-size: 15px;
+            color: var(--text-primary);
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            opacity: 0.6;
+        }
+
+        /* ===== Delete Confirm ===== */
+        .delete-confirm {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 28px 24px;
+            z-index: 300;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            display: none;
+            opacity: 0;
+            transition: all 0.25s;
+            min-width: 280px;
+        }
+
+        .delete-confirm.show {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .delete-confirm p {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .delete-confirm-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .delete-cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            background: var(--btn-bg);
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .delete-ok-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            background: #D9645A;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* ===== Swipe Delete ===== */
+        .note-card-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        .note-card-delete-bg {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: #D9645A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            color: white;
+        }
+
+        .note-card-delete-bg svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .note-card {
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        .note-card:nth-child(1) { animation-delay: 0.02s; }
+        .note-card:nth-child(2) { animation-delay: 0.04s; }
+        .note-card:nth-child(3) { animation-delay: 0.06s; }
+        .note-card:nth-child(4) { animation-delay: 0.08s; }
+        .note-card:nth-child(5) { animation-delay: 0.1s; }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
-
-    <!-- Lock Screen -->
-    <div class="lock-screen" id="lock-screen">
-        <div class="lock-box">
-            <div class="lock-icon">🔒</div>
-            <div class="lock-title" id="lock-title">设置密码</div>
-            <div class="lock-subtitle" id="lock-subtitle">设置一个4-8位数字密码保护你的日记</div>
-            <input type="password" class="lock-input" id="lock-input" maxlength="8" placeholder="••••" inputmode="numeric">
-            <button class="lock-btn" id="lock-btn" onclick="handleLock()">确定</button>
-            <div class="lock-error" id="lock-error"></div>
-            <button class="lock-skip" id="lock-skip" onclick="skipLock()">暂不设置</button>
+    <!-- Header -->
+    <header class="header">
+        <h1 class="header-title">CardNote</h1>
+        <div class="header-actions">
+            <button class="header-btn" id="searchBtn" aria-label="搜索">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </button>
+            <button class="header-btn" id="settingsBtn" aria-label="设置">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
         </div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-bar" id="searchBar">
+        <input type="text" class="search-input" id="searchInput" placeholder="搜索笔记...">
     </div>
 
-    <div class="header">
-        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
-        <h1>我的日记</h1>
-        <div style="position:relative;">
-            <button class="header-dots" id="settings-btn" onclick="toggleSettings(event)">•••</button>
-            <div class="settings-menu" id="settings-menu">
-                <button class="settings-item" onclick="exportData()">📤 导出备份</button>
-                <button class="settings-item" onclick="document.getElementById('import-file').click()">📥 导入恢复</button>
-                <button class="settings-item" onclick="openThemePicker()">🎨 主题色卡</button>
-                <button class="settings-item" onclick="changePassword()">🔑 修改密码</button>
-                <button class="settings-item" onclick="removeLock()">🔓 关闭密码锁</button>
+    <!-- Tab Bar -->
+    <div class="tab-bar" id="tabBar">
+        <button class="tab-item active" data-tag="all">全部</button>
+        <button class="tab-item" data-tag="日常">日常</button>
+        <button class="tab-item" data-tag="工作">工作</button>
+        <button class="tab-item" data-tag="灵感">灵感</button>
+        <button class="tab-item" data-tag="待办">待办</button>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-container" id="cardsContainer">
+        <!-- Dynamic content -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <p>还没有笔记，点击 + 创建第一篇</p>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" id="fabBtn" aria-label="新建笔记">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+    </button>
+
+    <!-- Editor Modal -->
+    <div class="modal-overlay" id="editorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" id="editorClose">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+                <button class="modal-save" id="editorSave">保存</button>
+            </div>
+            <input type="text" class="editor-title" id="editorTitle" placeholder="标题">
+            <textarea class="editor-content" id="editorContent" placeholder="写点什么..."></textarea>
+            <div class="editor-tag-row" id="editorTags">
+                <button class="editor-tag-btn" data-tag="日常">日常</button>
+                <button class="editor-tag-btn" data-tag="工作">工作</button>
+                <button class="editor-tag-btn" data-tag="灵感">灵感</button>
+                <button class="editor-tag-btn" data-tag="待办">待办</button>
             </div>
         </div>
-        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
     </div>
 
-    <div class="tab-bar">
-        <div class="tab active" id="tab-diary" onclick="switchTab('diary')">📝 日记</div>
-        <div class="tab" id="tab-calendar" onclick="switchTab('calendar')">📅 日历</div>
-        <div class="tab" id="tab-trash" onclick="switchTab('trash')">🗑️ 回收站</div>
-    </div>
+    <!-- Settings Panel -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+            <div class="settings-title">设置</div>
 
-    <div id="diary-page">
-        <div class="search-wrapper">
-            <input type="text" class="search-box" id="search-box" placeholder="🔍 搜索日记内容..." oninput="renderDiaries()">
-        </div>
-        <div style="padding: 0 16px 100px;">
-            <div id="diary-list"></div>
-        </div>
-    </div>
-
-    <div id="calendar-page" style="display:none;">
-        <div class="calendar-wrapper">
-            <div class="cal-header">
-                <button class="cal-nav" onclick="calNav(-1)">‹</button>
-                <span id="cal-month-title"></span>
-                <button class="cal-nav" onclick="calNav(1)">›</button>
+            <div class="settings-section">
+                <div class="settings-section-title">🌿 绿色系</div>
+                <div class="theme-grid">
+                    <div class="theme-option" data-theme="sage">
+                        <div class="theme-swatch swatch-sage"></div>
+                        <span class="theme-name">鼠尾草</span>
+                    </div>
+                    <div class="theme-option" data-theme="eucalyptus">
+                        <div class="theme-swatch swatch-eucalyptus"></div>
+                        <span class="theme-name">桉叶</span>
+                    </div>
+                    <div class="theme-option" data-theme="moss">
+                        <div class="theme-swatch swatch-moss"></div>
+                        <span class="theme-name">苔藓</span>
+                    </div>
+                    <div class="theme-option" data-theme="bamboo">
+                        <div class="theme-swatch swatch-bamboo"></div>
+                        <span class="theme-name">竹青</span>
+                    </div>
+                </div>
             </div>
-            <div class="cal-grid" id="cal-grid"></div>
-        </div>
-        <div class="cal-day-list">
-            <div class="cal-day-title" id="cal-day-title"></div>
-            <div id="cal-day-diaries"></div>
-        </div>
-    </div>
 
-    <div id="trash-page" style="padding: 16px 16px 100px; display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <p class="trash-info" style="font-size:13px; color:#9ca3af;">删除的日记将保留30天</p>
-            <button class="trash-empty-btn" onclick="showConfirm('确定清空回收站？',emptyTrash)" style="font-size:12px; color:#ef4444; background:#fef2f2; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">清空回收站</button>
-        </div>
-        <div id="trash-list"></div>
-    </div>
+            <div class="settings-section">
+                <div class="settings-section-title">🍂 暖色系</div>
+                <div class="theme-grid">
+                    <div class="theme-option" data-theme="linen">
+                        <div class="theme-swatch swatch-linen"></div>
+                        <span class="theme-name">暖棕</span>
+                    </div>
+                    <div class="theme-option" data-theme="cream">
+                        <div class="theme-swatch swatch-cream"></div>
+                        <span class="theme-name">奶油</span>
+                    </div>
+                    <div class="theme-option" data-theme="orange">
+                        <div class="theme-swatch swatch-orange"></div>
+                        <span class="theme-name">暖橙</span>
+                    </div>
+                    <div class="theme-option" data-theme="softred">
+                        <div class="theme-swatch swatch-softred"></div>
+                        <span class="theme-name">柔粉</span>
+                    </div>
+                </div>
+            </div>
 
-    <button class="fab" id="fab-btn" onclick="openModal()">+</button>
+            <div class="settings-section">
+                <div class="settings-section-title">💜 冷色系</div>
+                <div class="theme-grid">
+                    <div class="theme-option" data-theme="orchid">
+                        <div class="theme-swatch swatch-orchid"></div>
+                        <span class="theme-name">兰花紫</span>
+                    </div>
+                </div>
+            </div>
 
-    <div class="confirm-modal" id="confirm-modal">
-        <div class="confirm-modal-box">
-            <p id="confirm-msg">确定删除？</p>
-            <div class="confirm-btns">
-                <button class="confirm-cancel" onclick="hideConfirm()">取消</button>
-                <button class="confirm-ok" id="confirm-ok-btn" onclick="confirmAction()">确定</button>
+            <div class="settings-section" style="text-align:center; margin-top:20px;">
+                <button class="modal-close" id="settingsClose" style="width:auto; padding:10px 30px; border-radius:14px; font-size:14px;">
+                    关闭
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="view-modal" onclick="if(event.target===this)closeViewModal()">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <span class="view-date" id="view-date" style="font-size:14px; color:#6b7280;"></span>
-                <span id="view-mood" style="font-size:24px;"></span>
-            </div>
-            <div class="view-content" id="view-content"></div>
-            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:20px;" onclick="closeViewModal()">关闭</button>
+    <!-- Delete Confirm -->
+    <div class="delete-confirm" id="deleteConfirm">
+        <p>确定删除这篇笔记吗？</p>
+        <div class="delete-confirm-btns">
+            <button class="delete-cancel-btn" id="deleteCancel">取消</button>
+            <button class="delete-ok-btn" id="deleteOk">删除</button>
         </div>
     </div>
 
-    <div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
-        <div class="modal-content">
-            <h2 style="font-size:18px; font-weight:600; margin-bottom:16px;" id="modal-title">写日记</h2>
-            <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">今天心情如何？</p>
-            <div style="display:flex; gap:10px; margin-bottom:16px;">
-                <button class="mood-btn" onclick="selectMood(this,'😊')">😊</button>
-                <button class="mood-btn" onclick="selectMood(this,'😢')">😢</button>
-                <button class="mood-btn" onclick="selectMood(this,'😡')">😡</button>
-                <button class="mood-btn" onclick="selectMood(this,'😴')">😴</button>
-                <button class="mood-btn" onclick="selectMood(this,'🥰')">🥰</button>
-                <button class="mood-btn" onclick="selectMood(this,'😎')">😎</button>
-            </div>
-            <textarea id="diary-content" placeholder="今天发生了什么..."></textarea>
-            <button class="save-btn" id="save-btn" onclick="saveDiary()">保存日记</button>
-            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closeModal()">取消</button>
-        </div>
-    </div>
-
-    <!-- Password Change Modal -->
-    <div class="modal" id="pwd-modal" onclick="if(event.target===this)closePwdModal()">
-        <div class="modal-content" style="text-align:center;">
-            <h2 style="font-size:18px; font-weight:600; margin-bottom:8px;">修改密码</h2>
-            <p style="font-size:14px; color:#9ca3af; margin-bottom:20px;">请输入新的4-8位数字密码</p>
-            <input type="password" class="lock-input" id="new-pwd-input" maxlength="8" placeholder="••••" inputmode="numeric" style="margin-bottom:12px;">
-            <input type="password" class="lock-input" id="new-pwd-confirm" maxlength="8" placeholder="确认密码" inputmode="numeric" style="margin-bottom:4px;">
-            <div class="lock-error" id="pwd-error"></div>
-            <button class="save-btn" onclick="saveNewPassword()" style="margin-top:12px;">保存密码</button>
-            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closePwdModal()">取消</button>
-        </div>
-    </div>
-
-    <!-- Theme Picker Modal -->
-    <div class="modal" id="theme-modal" onclick="if(event.target===this)closeThemePicker()">
-        <div class="modal-content">
-            <h2 style="font-size:18px; font-weight:600; margin-bottom:4px;">🎨 主题色卡</h2>
-            <p style="font-size:14px; color:#9ca3af; margin-bottom:0;">选择你喜欢的莫兰迪色系</p>
-            <div class="theme-grid" id="theme-grid"></div>
-            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:16px;" onclick="closeThemePicker()">关闭</button>
-        </div>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script>
-        var selectedMood = '';
-        var editingId = null;
-        var confirmCallback = null;
-        var weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        var calYear, calMonth, calSelectedDate = null;
+        // ===== Data Layer =====
+        const DB_KEY = 'cardnote_data';
+        const THEME_KEY = 'cardnote_theme';
 
-        // ===== Theme Colors =====
-        var themeColors = [
-            { id: 'purple', name: '默认紫', primary: '#7c3aed', dark: '#4f46e5', light: '#f3e8ff', bg: '#f0f2ff', rgb: '124,58,237' },
-            { id: 'olive', name: '橄榄绿', primary: '#8B9A6B', dark: '#6B7A4B', light: '#f0f2e8', bg: '#f5f6f0', rgb: '139,154,107' },
-            { id: 'blue', name: '雾霾蓝', primary: '#7B9BA6', dark: '#5E8290', light: '#e8f2f5', bg: '#f0f5f7', rgb: '123,155,166' },
-            { id: 'cream', name: '奶油黄', primary: '#B8A070', dark: '#9A8558', light: '#faf5eb', bg: '#f9f6f0', rgb: '184,160,112' },
-            { id: 'pink', name: '豆沙粉', primary: '#B07B7B', dark: '#956060', light: '#f9f0f0', bg: '#f8f2f2', rgb: '176,123,123' },
-            { id: 'peach', name: '蜜桃色', primary: '#C4907A', dark: '#A8735E', light: '#faf0eb', bg: '#f9f4f0', rgb: '196,144,122' },
-            { id: 'brown', name: '暖棕色', primary: '#A08068', dark: '#876850', light: '#f5efe8', bg: '#f6f2ee', rgb: '160,128,104' },
-            { id: 'mauve', name: '灰紫色', primary: '#9B8BA0', dark: '#7D6E82', light: '#f4f0f5', bg: '#f5f2f6', rgb: '155,139,160' }
-        ];
-
-        function openThemePicker() {
-            closeSettings();
-            var currentTheme = localStorage.getItem('diary_theme_color') || 'purple';
-            var html = '';
-            for (var i = 0; i < themeColors.length; i++) {
-                var t = themeColors[i];
-                var isActive = t.id === currentTheme ? ' active' : '';
-                html += '<div class="theme-card' + isActive + '" onclick="applyTheme(\'' + t.id + '\')">';
-                html += '<div class="theme-color-preview" style="background:linear-gradient(135deg, ' + t.primary + ', ' + t.dark + ');"></div>';
-                html += '<span>' + t.name + '</span>';
-                html += '</div>';
+        function loadNotes() {
+            try {
+                return JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            } catch {
+                return [];
             }
-            document.getElementById('theme-grid').innerHTML = html;
-            document.getElementById('theme-modal').classList.add('active');
         }
 
-        function closeThemePicker() {
-            document.getElementById('theme-modal').classList.remove('active');
+        function saveNotes(notes) {
+            localStorage.setItem(DB_KEY, JSON.stringify(notes));
         }
 
-        function applyTheme(themeId) {
-            var theme = themeColors.find(function(t) { return t.id === themeId; });
-            if (!theme) return;
-
-            document.body.classList.add('theme-transitioning');
-            document.body.offsetHeight;
-
-            document.documentElement.style.setProperty('--primary', theme.primary);
-            document.documentElement.style.setProperty('--primary-dark', theme.dark);
-            document.documentElement.style.setProperty('--primary-light', theme.light);
-            document.documentElement.style.setProperty('--primary-bg', theme.bg);
-            document.documentElement.style.setProperty('--primary-rgb', theme.rgb);
-
-            localStorage.setItem('diary_theme_color', themeId);
-
-            // Update meta theme-color
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', theme.primary);
-
-            // Update active card
-            var cards = document.querySelectorAll('.theme-card');
-            for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
-            event.currentTarget.classList.add('active');
-
-            setTimeout(function() {
-                document.body.classList.remove('theme-transitioning');
-            }, 450);
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2);
         }
 
-        // Load saved theme on start
-        (function loadTheme() {
-            var savedId = localStorage.getItem('diary_theme_color') || 'purple';
-            var theme = themeColors.find(function(t) { return t.id === savedId; });
-            if (theme) {
-                document.documentElement.style.setProperty('--primary', theme.primary);
-                document.documentElement.style.setProperty('--primary-dark', theme.dark);
-                document.documentElement.style.setProperty('--primary-light', theme.light);
-                document.documentElement.style.setProperty('--primary-bg', theme.bg);
-                document.documentElement.style.setProperty('--primary-rgb', theme.rgb);
-                var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute('content', theme.primary);
+        // ===== State =====
+        let notes = loadNotes();
+        let currentTag = 'all';
+        let editingId = null;
+        let deleteId = null;
+
+        // ===== DOM =====
+        const cardsContainer = document.getElementById('cardsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const editorModal = document.getElementById('editorModal');
+        const editorTitle = document.getElementById('editorTitle');
+        const editorContent = document.getElementById('editorContent');
+        const editorTags = document.getElementById('editorTags');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const searchBar = document.getElementById('searchBar');
+        const searchInput = document.getElementById('searchInput');
+        const deleteConfirm = document.getElementById('deleteConfirm');
+        const toast = document.getElementById('toast');
+
+        // ===== Init Theme =====
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'sage';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateActiveTheme(savedTheme);
+
+        // ===== Render Notes =====
+        function renderNotes() {
+            const query = searchInput.value.trim().toLowerCase();
+            let filtered = notes;
+
+            if (currentTag !== 'all') {
+                filtered = filtered.filter(n => n.tag === currentTag);
             }
-        })();
 
-        // ===== Lock Screen =====
-        (function initLock() {
-            var pwd = localStorage.getItem('diary_password');
-            var lockDisabled = localStorage.getItem('diary_lock_disabled');
-            var lockScreen = document.getElementById('lock-screen');
-            
-            if (lockDisabled === 'true' || (!pwd && lockDisabled === 'true')) {
-                lockScreen.classList.add('hidden');
+            if (query) {
+                filtered = filtered.filter(n =>
+                    n.title.toLowerCase().includes(query) ||
+                    n.content.toLowerCase().includes(query)
+                );
+            }
+
+            // Sort by date descending
+            filtered.sort((a, b) => b.updatedAt - a.updatedAt);
+
+            if (filtered.length === 0) {
+                cardsContainer.innerHTML = '';
+                emptyState.style.display = 'block';
                 return;
             }
-            
-            if (!pwd) {
-                document.getElementById('lock-title').textContent = '设置密码';
-                document.getElementById('lock-subtitle').textContent = '设置一个4-8位数字密码保护你的日记';
-                document.getElementById('lock-btn').textContent = '设置密码';
-                document.getElementById('lock-skip').style.display = 'inline';
-            } else {
-                document.getElementById('lock-title').textContent = '请输入密码';
-                document.getElementById('lock-subtitle').textContent = '输入密码解锁你的日记';
-                document.getElementById('lock-btn').textContent = '解锁';
-                document.getElementById('lock-skip').style.display = 'none';
-            }
-        })();
 
-        function handleLock() {
-            var input = document.getElementById('lock-input');
-            var val = input.value.trim();
-            var pwd = localStorage.getItem('diary_password');
-            var errorEl = document.getElementById('lock-error');
-
-            if (!pwd) {
-                if (val.length < 4) { errorEl.textContent = '密码至少4位'; return; }
-                if (!/^\d+$/.test(val)) { errorEl.textContent = '请输入纯数字密码'; return; }
-                localStorage.setItem('diary_password', val);
-                localStorage.removeItem('diary_lock_disabled');
-                document.getElementById('lock-screen').classList.add('hidden');
-            } else {
-                if (val === pwd) {
-                    document.getElementById('lock-screen').classList.add('hidden');
-                } else {
-                    errorEl.textContent = '密码错误';
-                    input.value = '';
-                }
-            }
+            emptyState.style.display = 'none';
+            cardsContainer.innerHTML = filtered.map(note => `
+                <div class="note-card" data-id="${note.id}" onclick="openNote('${note.id}')">
+                    <div class="note-card-title">${escapeHtml(note.title || '无标题')}</div>
+                    <div class="note-card-content">${escapeHtml(note.content || '')}</div>
+                    <div class="note-card-footer">
+                        <span class="note-card-tag">#${note.tag || '日常'}</span>
+                        <div class="note-card-actions">
+                            <span class="note-card-date">${formatDate(note.updatedAt)}</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();confirmDelete('${note.id}')">
+                                <polyline points="3,6 5,6 21,6"/>
+                                <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6M8,6V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function skipLock() {
-            localStorage.setItem('diary_lock_disabled', 'true');
-            document.getElementById('lock-screen').classList.add('hidden');
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        document.getElementById('lock-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') handleLock();
+        function formatDate(ts) {
+            const d = new Date(ts);
+            const y = d.getFullYear().toString().slice(2);
+            const m = (d.getMonth() + 1).toString().padStart(2, '0');
+            const day = d.getDate().toString().padStart(2, '0');
+            const h = d.getHours().toString().padStart(2, '0');
+            const min = d.getMinutes().toString().padStart(2, '0');
+            return `${y}/${m}/${day} ${h}:${min}`;
+        }
+
+        // ===== Editor =====
+        document.getElementById('fabBtn').addEventListener('click', () => {
+            editingId = null;
+            editorTitle.value = '';
+            editorContent.value = '';
+            setEditorTag('日常');
+            openModal(editorModal);
+            setTimeout(() => editorTitle.focus(), 350);
         });
 
-        function changePassword() {
-            closeSettings();
-            document.getElementById('new-pwd-input').value = '';
-            document.getElementById('new-pwd-confirm').value = '';
-            document.getElementById('pwd-error').textContent = '';
-            document.getElementById('pwd-modal').classList.add('active');
+        function openNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+            editingId = id;
+            editorTitle.value = note.title;
+            editorContent.value = note.content;
+            setEditorTag(note.tag || '日常');
+            openModal(editorModal);
         }
 
-        function closePwdModal() {
-            document.getElementById('pwd-modal').classList.remove('active');
-        }
+        document.getElementById('editorSave').addEventListener('click', () => {
+            const title = editorTitle.value.trim();
+            const content = editorContent.value.trim();
+            if (!title && !content) {
+                showToast('请输入内容');
+                return;
+            }
 
-        function saveNewPassword() {
-            var pwd = document.getElementById('new-pwd-input').value.trim();
-            var confirm = document.getElementById('new-pwd-confirm').value.trim();
-            var errorEl = document.getElementById('pwd-error');
-            
-            if (pwd.length < 4) { errorEl.textContent = '密码至少4位'; return; }
-            if (!/^\d+$/.test(pwd)) { errorEl.textContent = '请输入纯数字密码'; return; }
-            if (pwd !== confirm) { errorEl.textContent = '两次密码不一致'; return; }
-            
-            localStorage.setItem('diary_password', pwd);
-            localStorage.removeItem('diary_lock_disabled');
-            closePwdModal();
-        }
+            const tag = getSelectedTag();
+            const now = Date.now();
 
-        function removeLock() {
-            closeSettings();
-            showConfirm('确定关闭密码锁？', function() {
-                localStorage.removeItem('diary_password');
-                localStorage.setItem('diary_lock_disabled', 'true');
+            if (editingId) {
+                const idx = notes.findIndex(n => n.id === editingId);
+                if (idx > -1) {
+                    notes[idx].title = title;
+                    notes[idx].content = content;
+                    notes[idx].tag = tag;
+                    notes[idx].updatedAt = now;
+                }
+            } else {
+                notes.push({
+                    id: generateId(),
+                    title,
+                    content,
+                    tag,
+                    createdAt: now,
+                    updatedAt: now
+                });
+            }
+
+            saveNotes(notes);
+            closeModal(editorModal);
+            renderNotes();
+            showToast(editingId ? '已更新' : '已保存');
+        });
+
+        document.getElementById('editorClose').addEventListener('click', () => {
+            closeModal(editorModal);
+        });
+
+        // Tag selection
+        editorTags.addEventListener('click', (e) => {
+            const btn = e.target.closest('.editor-tag-btn');
+            if (!btn) return;
+            editorTags.querySelectorAll('.editor-tag-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+
+        function setEditorTag(tag) {
+            editorTags.querySelectorAll('.editor-tag-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tag === tag);
             });
         }
 
-        // ===== Settings =====
-        function toggleSettings(e) {
-            e.stopPropagation();
-            var menu = document.getElementById('settings-menu');
-            menu.classList.toggle('show');
-        }
-        function closeSettings() {
-            document.getElementById('settings-menu').classList.remove('show');
+        function getSelectedTag() {
+            const active = editorTags.querySelector('.editor-tag-btn.active');
+            return active ? active.dataset.tag : '日常';
         }
 
-        // ===== Export/Import =====
-        function exportData() {
-            closeSettings();
-            var data = {
-                diaries: JSON.parse(localStorage.getItem('diaries') || '[]'),
-                trash: JSON.parse(localStorage.getItem('trash') || '[]'),
-                exportDate: new Date().toISOString()
-            };
-            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = '我的日记_备份_' + new Date().toISOString().slice(0, 10) + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function importData(event) {
-            closeSettings();
-            var file = event.target.files[0];
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    var data = JSON.parse(e.target.result);
-                    if (!data.diaries || !Array.isArray(data.diaries)) return;
-                    showConfirm('导入将覆盖当前所有数据，确定继续？', function() {
-                        localStorage.setItem('diaries', JSON.stringify(data.diaries));
-                        if (data.trash) localStorage.setItem('trash', JSON.stringify(data.trash));
-                        renderDiaries();
-                    });
-                } catch (err) {}
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        // ===== Dark Mode =====
-        function toggleTheme() {
-            document.body.classList.add('theme-transitioning');
-            document.body.offsetHeight;
-            var isDark = document.body.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
-            setTimeout(function() {
-                document.body.classList.remove('theme-transitioning');
-            }, 450);
-        }
-        (function() {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark');
-                document.getElementById('theme-toggle').textContent = '☀️';
-            }
-        })();
-
-        // ===== Confirm =====
-        function showConfirm(msg, callback) {
-            document.getElementById('confirm-msg').textContent = msg;
-            document.getElementById('confirm-modal').classList.add('active');
-            confirmCallback = callback;
-        }
-        function hideConfirm() { document.getElementById('confirm-modal').classList.remove('active'); }
-        function confirmAction() {
-            var cb = confirmCallback;
-            confirmCallback = null;
-            hideConfirm();
-            if (cb) cb();
-        }
-
-        function getWeekDay(dateStr) {
-            var d = new Date(dateStr);
-            return weekDays[d.getDay()];
-        }
-
-        // ===== Tab =====
-        function switchTab(tab) {
-            document.getElementById('tab-diary').classList.toggle('active', tab === 'diary');
-            document.getElementById('tab-calendar').classList.toggle('active', tab === 'calendar');
-            document.getElementById('tab-trash').classList.toggle('active', tab === 'trash');
-            document.getElementById('diary-page').style.display = tab === 'diary' ? 'block' : 'none';
-            document.getElementById('calendar-page').style.display = tab === 'calendar' ? 'block' : 'none';
-            document.getElementById('trash-page').style.display = tab === 'trash' ? 'block' : 'none';
-            document.getElementById('fab-btn').style.display = (tab === 'diary' || tab === 'calendar') ? 'flex' : 'none';
-            if (tab === 'trash') renderTrash();
-            if (tab === 'calendar') renderCalendar();
-        }
-
-        // ===== Calendar =====
-        (function() {
-            var now = new Date();
-            calYear = now.getFullYear();
-            calMonth = now.getMonth();
-        })();
-
-        function calNav(dir) {
-            calMonth += dir;
-            if (calMonth < 0) { calMonth = 11; calYear--; }
-            if (calMonth > 11) { calMonth = 0; calYear++; }
-            calSelectedDate = null;
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            var diaryDates = {};
-            diaries.forEach(function(d) { diaryDates[d.date] = true; });
-
-            document.getElementById('cal-month-title').textContent = calYear + '年' + (calMonth + 1) + '月';
-
-            var firstDay = new Date(calYear, calMonth, 1).getDay();
-            var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-            var daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
-
-            var today = new Date();
-            var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-
-            var html = '';
-            var wkdays = ['日', '一', '二', '三', '四', '五', '六'];
-            for (var i = 0; i < 7; i++) {
-                html += '<div class="cal-weekday">' + wkdays[i] + '</div>';
-            }
-
-            for (var i = firstDay - 1; i >= 0; i--) {
-                var day = daysInPrevMonth - i;
-                html += '<div class="cal-day other-month">' + day + '</div>';
-            }
-
-            for (var d = 1; d <= daysInMonth; d++) {
-                var dateStr = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-                var classes = 'cal-day';
-                if (dateStr === todayStr) classes += ' today';
-                if (diaryDates[dateStr]) classes += ' has-diary';
-                if (dateStr === calSelectedDate) classes += ' selected';
-                html += '<div class="' + classes + '" onclick="selectCalDate(\'' + dateStr + '\')">' + d + '</div>';
-            }
-
-            var totalCells = firstDay + daysInMonth;
-            var remaining = (7 - totalCells % 7) % 7;
-            for (var i = 1; i <= remaining; i++) {
-                html += '<div class="cal-day other-month">' + i + '</div>';
-            }
-
-            document.getElementById('cal-grid').innerHTML = html;
-            renderCalDayDiaries();
-        }
-
-        function selectCalDate(dateStr) {
-            calSelectedDate = calSelectedDate === dateStr ? null : dateStr;
-            renderCalendar();
-        }
-
-        function renderCalDayDiaries() {
-            var titleEl = document.getElementById('cal-day-title');
-            var listEl = document.getElementById('cal-day-diaries');
-
-            if (!calSelectedDate) {
-                var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-                var monthStr = calYear + '-' + String(calMonth+1).padStart(2,'0');
-                var monthDiaries = diaries.filter(function(d) { return d.date.startsWith(monthStr); });
-                titleEl.textContent = '本月共 ' + monthDiaries.length + ' 篇日记';
-                if (monthDiaries.length === 0) {
-                    listEl.innerHTML = '<div class="empty-state"><p style="font-size:36px;margin-bottom:12px;">📅</p><p>本月暂无日记</p></div>';
-                } else {
-                    var html = '';
-                    monthDiaries.forEach(function(d) {
-                        var preview = d.content.length > 60 ? d.content.substring(0, 60) + '...' : d.content;
-                        html += '<div class="diary-card" onclick="viewDiary(' + d.id + ')">';
-                        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-                        html += '<span class="date-text" style="font-size:13px;color:#6b7280;">' + d.date + ' ' + getWeekDay(d.date) + ' ' + d.time + '</span>';
-                        if (d.mood) html += '<span style="font-size:18px;">' + d.mood + '</span>';
-                        html += '</div>';
-                        html += '<p style="font-size:14px;line-height:1.4;color:#374151;white-space:pre-wrap;">' + escapeHtml(preview) + '</p>';
-                        html += '</div>';
-                    });
-                    listEl.innerHTML = html;
-                }
-            } else {
-                var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-                var dayDiaries = diaries.filter(function(d) { return d.date === calSelectedDate; });
-                titleEl.textContent = calSelectedDate + ' ' + getWeekDay(calSelectedDate) + ' (' + dayDiaries.length + '篇)';
-                if (dayDiaries.length === 0) {
-                    listEl.innerHTML = '<div class="empty-state"><p style="font-size:36px;margin-bottom:12px;">📝</p><p>这一天没有日记</p></div>';
-                } else {
-                    var html = '';
-                    dayDiaries.forEach(function(d) {
-                        html += '<div class="diary-card" onclick="viewDiary(' + d.id + ')">';
-                        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-                        html += '<span class="date-text" style="font-size:13px;color:#6b7280;">' + d.time + '</span>';
-                        if (d.mood) html += '<span style="font-size:18px;">' + d.mood + '</span>';
-                        html += '</div>';
-                        html += '<p style="font-size:14px;line-height:1.4;color:#374151;white-space:pre-wrap;">' + escapeHtml(d.content) + '</p>';
-                        html += '</div>';
-                    });
-                    listEl.innerHTML = html;
-                }
-            }
-        }
-
-        // ===== Click handlers =====
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('#settings-btn') && !e.target.closest('#settings-menu')) {
-                closeSettings();
-            }
-            closeAllMenus();
+        // ===== Tab Filter =====
+        document.getElementById('tabBar').addEventListener('click', (e) => {
+            const tab = e.target.closest('.tab-item');
+            if (!tab) return;
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentTag = tab.dataset.tag;
+            renderNotes();
         });
 
-        function closeAllMenus() {
-            var menus = document.querySelectorAll('.popup-menu.show');
-            for (var i = 0; i < menus.length; i++) menus[i].classList.remove('show');
-        }
-
-        // ===== View =====
-        function viewDiary(id) {
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            var item = diaries.find(function(d) { return d.id === id; });
-            if (!item) return;
-            document.getElementById('view-date').textContent = item.date + ' ' + getWeekDay(item.date) + ' ' + item.time;
-            document.getElementById('view-mood').textContent = item.mood || '';
-            document.getElementById('view-content').textContent = item.content;
-            document.getElementById('view-modal').classList.add('active');
-        }
-        function closeViewModal() { document.getElementById('view-modal').classList.remove('active'); }
-
-        // ===== Modal =====
-        function openModal() {
-            editingId = null;
-            document.getElementById('modal-title').textContent = '写日记';
-            document.getElementById('save-btn').textContent = '保存日记';
-            document.getElementById('diary-content').value = '';
-            selectedMood = '';
-            var btns = document.querySelectorAll('.mood-btn');
-            for (var i = 0; i < btns.length; i++) btns[i].classList.remove('selected');
-            document.getElementById('modal').classList.add('active');
-        }
-        function openEditModal(id) {
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            var item = diaries.find(function(d) { return d.id === id; });
-            if (!item) return;
-            editingId = id;
-            document.getElementById('modal-title').textContent = '编辑日记';
-            document.getElementById('save-btn').textContent = '保存修改';
-            document.getElementById('diary-content').value = item.content;
-            selectedMood = item.mood || '';
-            var btns = document.querySelectorAll('.mood-btn');
-            for (var i = 0; i < btns.length; i++) {
-                btns[i].classList.remove('selected');
-                if (item.mood && btns[i].textContent === item.mood) btns[i].classList.add('selected');
-            }
-            document.getElementById('modal').classList.add('active');
-        }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); editingId = null; }
-
-        function selectMood(btn, mood) {
-            if (selectedMood === mood) { selectedMood = ''; btn.classList.remove('selected'); return; }
-            selectedMood = mood;
-            var btns = document.querySelectorAll('.mood-btn');
-            for (var i = 0; i < btns.length; i++) btns[i].classList.remove('selected');
-            btn.classList.add('selected');
-        }
-
-        function saveDiary() {
-            var content = document.getElementById('diary-content').value.trim();
-            if (!content) return;
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            if (editingId) {
-                var item = diaries.find(function(d) { return d.id === editingId; });
-                if (item) { item.content = content; item.mood = selectedMood; }
+        // ===== Search =====
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            searchBar.classList.toggle('show');
+            if (searchBar.classList.contains('show')) {
+                searchInput.focus();
             } else {
-                var now = new Date();
-                diaries.unshift({
-                    id: Date.now(),
-                    date: now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0'),
-                    time: String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0'),
-                    mood: selectedMood,
-                    content: content
-                });
+                searchInput.value = '';
+                renderNotes();
             }
-            localStorage.setItem('diaries', JSON.stringify(diaries));
-            closeModal();
-            renderDiaries();
-            if (document.getElementById('calendar-page').style.display !== 'none') renderCalendar();
+        });
+
+        searchInput.addEventListener('input', () => {
+            renderNotes();
+        });
+
+        // ===== Settings =====
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            openModal(settingsOverlay);
+        });
+
+        document.getElementById('settingsClose').addEventListener('click', () => {
+            closeModal(settingsOverlay);
+        });
+
+        settingsOverlay.addEventListener('click', (e) => {
+            if (e.target === settingsOverlay) closeModal(settingsOverlay);
+        });
+
+        // Theme selection
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const theme = opt.dataset.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem(THEME_KEY, theme);
+                updateActiveTheme(theme);
+            });
+        });
+
+        function updateActiveTheme(theme) {
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.theme === theme);
+            });
         }
 
         // ===== Delete =====
-        function deleteDiary(id) {
-            showConfirm('确定移入回收站？', function() {
-                var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-                var trash = JSON.parse(localStorage.getItem('trash') || '[]');
-                var item = diaries.find(function(d) { return d.id === id; });
-                if (item) {
-                    item.deletedAt = Date.now();
-                    trash.unshift(item);
-                    localStorage.setItem('trash', JSON.stringify(trash));
-                }
-                diaries = diaries.filter(function(d) { return d.id !== id; });
-                localStorage.setItem('diaries', JSON.stringify(diaries));
-                renderDiaries();
-            });
+        function confirmDelete(id) {
+            deleteId = id;
+            deleteConfirm.classList.add('show');
         }
 
-        // ===== Trash =====
-        function restoreDiary(id) {
-            var trash = JSON.parse(localStorage.getItem('trash') || '[]');
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            var item = trash.find(function(d) { return d.id === id; });
-            if (item) { delete item.deletedAt; diaries.unshift(item); localStorage.setItem('diaries', JSON.stringify(diaries)); }
-            trash = trash.filter(function(d) { return d.id !== id; });
-            localStorage.setItem('trash', JSON.stringify(trash));
-            renderTrash();
-        }
-        function permDelete(id) {
-            showConfirm('永久删除？不可恢复！', function() {
-                var trash = JSON.parse(localStorage.getItem('trash') || '[]');
-                trash = trash.filter(function(d) { return d.id !== id; });
-                localStorage.setItem('trash', JSON.stringify(trash));
-                renderTrash();
-            });
-        }
-        function emptyTrash() {
-            localStorage.setItem('trash', '[]');
-            renderTrash();
-        }
-
-        // ===== Render =====
-        function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-
-        function renderDiaries() {
-            var diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            var q = document.getElementById('search-box').value.trim().toLowerCase();
-            if (q) {
-                diaries = diaries.filter(function(d) {
-                    return d.content.toLowerCase().indexOf(q) !== -1 || d.date.indexOf(q) !== -1;
-                });
-            }
-            var list = document.getElementById('diary-list');
-            if (diaries.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p style="font-size:48px;margin-bottom:16px;">' + (q ? '🔍' : '📝') + '</p><p style="font-size:16px;">' + (q ? '没有找到相关日记' : '还没有日记') + '</p>' + (q ? '' : '<p style="font-size:14px;margin-top:8px;">点击右下角 + 开始写第一篇吧</p>') + '</div>';
-                return;
-            }
-            var html = '';
-            for (var i = 0; i < diaries.length; i++) {
-                var d = diaries[i];
-                var preview = d.content.length > 80 ? d.content.substring(0, 80) + '...' : d.content;
-                var weekDay = getWeekDay(d.date);
-                html += '<div class="diary-card" data-id="' + d.id + '">';
-                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-                html += '<span class="date-text" style="font-size:14px;color:#6b7280;">' + d.date + ' ' + weekDay + ' ' + d.time + '</span>';
-                if (d.mood) html += '<span style="font-size:20px;">' + d.mood + '</span>';
-                html += '</div>';
-                html += '<p style="font-size:15px;line-height:1.4;color:#374151;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + escapeHtml(preview) + '</p>';
-                html += '<div style="display:flex;justify-content:flex-end;margin-top:10px;">';
-                html += '<div class="menu-wrapper">';
-                html += '<button class="more-btn" data-menu="' + d.id + '">•••</button>';
-                html += '<div class="popup-menu" id="menu-' + d.id + '">';
-                html += '<button class="popup-menu-item" data-action="edit" data-id="' + d.id + '">✏️ 编辑</button>';
-                html += '<button class="popup-menu-item danger" data-action="delete" data-id="' + d.id + '">🗑️ 删除</button>';
-                html += '</div>';
-                html += '</div></div></div>';
-            }
-            list.innerHTML = html;
-        }
-
-        document.getElementById('diary-list').addEventListener('click', function(e) {
-            var target = e.target;
-            if (target.classList.contains('more-btn')) {
-                e.stopPropagation();
-                var menuId = target.getAttribute('data-menu');
-                var menu = document.getElementById('menu-' + menuId);
-                var isOpen = menu.classList.contains('show');
-                closeAllMenus();
-                if (!isOpen) menu.classList.add('show');
-                return;
-            }
-            if (target.getAttribute('data-action') === 'edit') {
-                e.stopPropagation(); closeAllMenus();
-                openEditModal(Number(target.getAttribute('data-id')));
-                return;
-            }
-            if (target.getAttribute('data-action') === 'delete') {
-                e.stopPropagation(); closeAllMenus();
-                deleteDiary(Number(target.getAttribute('data-id')));
-                return;
-            }
-            var card = target.closest('.diary-card');
-            if (card && !target.closest('.menu-wrapper')) {
-                viewDiary(Number(card.getAttribute('data-id')));
-            }
+        document.getElementById('deleteCancel').addEventListener('click', () => {
+            deleteConfirm.classList.remove('show');
+            deleteId = null;
         });
 
-        function renderTrash() {
-            var trash = JSON.parse(localStorage.getItem('trash') || '[]');
-            var list = document.getElementById('trash-list');
-            if (trash.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p style="font-size:48px;margin-bottom:16px;">🗑️</p><p style="font-size:16px;">回收站是空的</p></div>';
-                return;
+        document.getElementById('deleteOk').addEventListener('click', () => {
+            if (deleteId) {
+                notes = notes.filter(n => n.id !== deleteId);
+                saveNotes(notes);
+                renderNotes();
+                showToast('已删除');
             }
-            var html = '';
-            for (var i = 0; i < trash.length; i++) {
-                var d = trash[i];
-                var daysLeft = 30 - Math.floor((Date.now() - d.deletedAt) / (24*60*60*1000));
-                var weekDay = getWeekDay(d.date);
-                html += '<div class="diary-card" style="opacity:0.8;cursor:default;">';
-                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-                html += '<span class="date-text" style="font-size:14px;color:#6b7280;">' + d.date + ' ' + weekDay + ' ' + d.time + (d.mood ? ' ' + d.mood : '') + '</span>';
-                html += '<span class="days-left" style="font-size:11px;color:#9ca3af;">' + daysLeft + '天后删除</span>';
-                html += '</div>';
-                html += '<p style="font-size:15px;line-height:1.4;color:#374151;margin-bottom:10px;white-space:pre-wrap;">' + escapeHtml(d.content) + '</p>';
-                html += '<div style="display:flex;gap:8px;justify-content:flex-end;">';
-                html += '<button class="action-btn restore-btn" onclick="restoreDiary(' + d.id + ')">↩️ 恢复</button>';
-                html += '<button class="action-btn perm-delete-btn" onclick="permDelete(' + d.id + ')">永久删除</button>';
-                html += '</div></div>';
-            }
-            list.innerHTML = html;
+            deleteConfirm.classList.remove('show');
+            deleteId = null;
+        });
+
+        // ===== Modal Helpers =====
+        function openModal(el) {
+            el.classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
-        // Auto cleanup
-        (function() {
-            var trash = JSON.parse(localStorage.getItem('trash') || '[]');
-            var now = Date.now();
-            trash = trash.filter(function(d) { return (now - d.deletedAt) < 30*24*60*60*1000; });
-            localStorage.setItem('trash', JSON.stringify(trash));
-        })();
+        function closeModal(el) {
+            el.classList.remove('show');
+            document.body.style.overflow = '';
+        }
 
-        renderDiaries();
+        editorModal.addEventListener('click', (e) => {
+            if (e.target === editorModal) closeModal(editorModal);
+        });
+
+        // ===== Toast =====
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ===== Demo Data =====
+        if (notes.length === 0) {
+            const now = Date.now();
+            notes = [
+                {
+                    id: generateId(),
+                    title: '冰岛🇮🇸旅行计划',
+                    content: '1、一定记得多带些衣服\n2、准备好相机和三脚架\n3、查看极光预报',
+                    tag: '日常',
+                    createdAt: now - 3600000,
+                    updatedAt: now - 3600000
+                },
+                {
+                    id: generateId(),
+                    title: 'CardNote开发笔记',
+                    content: '1、增加琉璃色盘功能\n2、优化主题切换动画\n3、支持Markdown格式',
+                    tag: '工作',
+                    createdAt: now - 7200000,
+                    updatedAt: now - 7200000
+                },
+                {
+                    id: generateId(),
+                    title: '以梦为马',
+                    content: '我要做远方的忠诚的儿子，和物质的短暂情人。',
+                    tag: '灵感',
+                    createdAt: now - 10800000,
+                    updatedAt: now - 10800000
+                },
+                {
+                    id: generateId(),
+                    title: '学习计划',
+                    content: '1、记单词30分钟\n2、阅读英文文章\n3、练习听力',
+                    tag: '待办',
+                    createdAt: now - 14400000,
+                    updatedAt: now - 14400000
+                },
+                {
+                    id: generateId(),
+                    title: '每日健身计划',
+                    content: '1、每日下午6点打球\n2、晚上做20分钟拉伸\n3、周末跑步5公里',
+                    tag: '日常',
+                    createdAt: now - 18000000,
+                    updatedAt: now - 18000000
+                }
+            ];
+            saveNotes(notes);
+        }
+
+        // ===== Initial Render =====
+        renderNotes();
+
+        // ===== Service Worker =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
     </script>
 </body>
 </html>
