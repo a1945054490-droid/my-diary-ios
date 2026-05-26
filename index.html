@@ -1,12 +1,3 @@
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#7c3aed">
-<link rel="apple-touch-icon" href="icon.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script>
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -14,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#7c3aed">
     <title>我的日记</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -172,7 +164,6 @@
         .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #f3f4f6; color: #374151; }
         .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #ef4444; color: white; }
 
-        /* Lock Screen */
         .lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--primary-bg); z-index: 9999; display: flex; align-items: center;
@@ -202,7 +193,6 @@
             background: none; border: none;
         }
 
-        /* Header dots button */
         .header-dots {
             background: none; border: none; color: white; cursor: pointer;
             padding: 6px 10px; border-radius: 8px; font-size: 18px; letter-spacing: 2px;
@@ -210,7 +200,6 @@
         }
         .header-dots:hover { background: rgba(255,255,255,0.2); }
 
-        /* Settings Menu */
         .settings-menu {
             display: none; position: absolute; top: 100%; right: 0; margin-top: 8px;
             background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
@@ -225,7 +214,6 @@
         .settings-item:hover { background: #f9fafb; }
         .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
 
-        /* Calendar */
         .calendar-wrapper {
             padding: 16px; background: var(--primary-bg);
         }
@@ -261,7 +249,6 @@
         .cal-day-list { padding: 0 16px 100px; }
         .cal-day-title { font-size: 14px; color: #6b7280; margin-bottom: 12px; padding: 8px 0; }
 
-        /* Theme Picker */
         .theme-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px;
         }
@@ -434,7 +421,7 @@
             { id: 'sage', name: '鼠尾草绿', primary: '#96A08D', dark: '#7A8670', light: '#f0f3ed', bg: '#f3f5f0', rgb: '150,160,141' },
             { id: 'olive', name: '橄榄绿', primary: '#8A9579', dark: '#6E8064', light: '#eff2ec', bg: '#f2f5f0', rgb: '138,149,121' },
             { id: 'bamboo', name: '竹青', primary: '#7E9485', dark: '#628070', light: '#edf2ee', bg: '#f0f4f1', rgb: '126,148,133' },
-            { id: 'mint', name: '薄荷绿', primary: '#7ECBA4', dark: '#5EAD86', light: '#edf8f2', bg: '#f0f9f4', rgb: '126,203,164' }
+            { id: 'mint', name: '薄荷绿', primary: '#b9dac4', dark: '#9ac4aa', light: '#f2f8f4', bg: '#edf5f0', rgb: '185,218,196' }
         ];
 
         function openThemePicker() {
