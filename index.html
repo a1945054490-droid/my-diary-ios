@@ -7,8 +7,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#7c3aed">
-    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%E6%88%91%E7%9A%84%E6%97%A5%E8%AE%B0%22%2C%22short_name%22%3A%22%E6%97%A5%E8%AE%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%237c3aed%22%2C%22theme_color%22%3A%22%237c3aed%22%7D">
     <title>我的日记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --primary: #7c3aed;
@@ -18,28 +18,25 @@
             --primary-rgb: 124, 58, 237;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html {
             height: 100%;
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
-            /* 关键修复：用纯色background-color，iOS standalone模式会用这个颜色作为回弹背景 */
-            background-color: var(--primary);
+            overscroll-behavior-y: none;
+            background: var(--primary);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--primary-bg);
             min-height: 100%;
             width: 100%;
             overflow-x: hidden;
+            overscroll-behavior-y: none;
+            -webkit-text-size-adjust: 100%;
             -webkit-tap-highlight-color: transparent;
-            position: relative;
         }
 
         body.theme-transitioning,
@@ -49,16 +46,11 @@
             transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease !important;
         }
 
-        /* Dark Mode */
-        body.dark {
-            background: #1a1a1a;
-            color: #d4d4d4;
-        }
+        body.dark { background: #1a1a1a; color: #d4d4d4; }
         body.dark .diary-card { background: #2a2a2a; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         body.dark .diary-card p { color: #c8c8c8 !important; }
         body.dark .diary-card .date-text { color: #999 !important; }
         body.dark .header { background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 70%, black), color-mix(in srgb, var(--primary-dark) 70%, black)); }
-        body.dark .header::before { background: color-mix(in srgb, var(--primary) 70%, black); }
         body.dark .tab-bar { background: #1f1f1f; border-bottom-color: #333; }
         body.dark .tab { color: #888; }
         body.dark .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
@@ -112,246 +104,13 @@
         body.dark .theme-card { border-color: #444; }
         body.dark .theme-card span { color: #d4d4d4; }
 
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 16px 20px;
-            padding-top: calc(env(safe-area-inset-top, 16px) + 16px);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* 关键修复：向上延伸覆盖回弹区域 */
-            position: relative;
-        }
-
-        /* 关键修复：header向上延伸一个伪元素，覆盖下拉回弹时露出的区域 */
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -200px;
-            left: 0;
-            right: 0;
-            height: 200px;
-            background: var(--primary);
-            z-index: -1;
-        }
-
-        .header h1 { font-size: 20px; font-weight: 600; }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 8px;
-        }
-
-        .header-dots {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 18px;
-            letter-spacing: 2px;
-            font-weight: bold;
-        }
-        .header-dots:hover { background: rgba(255,255,255,0.2); }
-
-        .settings-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-            overflow: hidden;
-            z-index: 999;
-            min-width: 160px;
-        }
-        .settings-menu.show { display: block; }
-        .settings-item {
-            display: block;
-            padding: 14px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            color: #374151;
-            white-space: nowrap;
-        }
-        .settings-item:hover { background: #f9fafb; }
-        .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
-
-        .tab-bar {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 0;
-            z-index: 9;
-        }
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            cursor: pointer;
-            color: #6b7280;
-            border-bottom: 2px solid transparent;
-        }
-        .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            font-weight: 600;
-        }
-
-        .search-wrapper {
-            padding: 12px 16px;
-            background: var(--primary-bg);
-            position: sticky;
-            top: 44px;
-            z-index: 8;
-        }
-        .search-box {
-            width: 100%;
-            padding: 10px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 14px;
-            outline: none;
-            background: white;
-        }
-        .search-box:focus { border-color: var(--primary); }
-
-        .diary-card {
-            background: white;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9ca3af;
-        }
-
-        .more-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: #9ca3af;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            letter-spacing: 2px;
-        }
-        .more-btn:hover { background: #f3f4f6; color: #6b7280; }
-
-        .menu-wrapper { position: relative; display: inline-block; }
-
-        .popup-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 4px;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-            overflow: hidden;
-            z-index: 999;
-            min-width: 130px;
-        }
-        .popup-menu.show { display: block; }
-        .popup-menu-item {
-            display: block;
-            padding: 14px 20px;
-            font-size: 15px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            color: #374151;
-        }
-        .popup-menu-item:hover { background: #f9fafb; }
-        .popup-menu-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
-        .popup-menu-item.danger { color: #ef4444; }
-
-        .fab {
-            position: fixed;
-            bottom: calc(30px + env(safe-area-inset-bottom, 0px));
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            font-size: 32px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.4);
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-        }
+        .diary-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; position: relative; }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 32px; border: none; box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.4); cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
         .modal.active { display: flex; }
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .mood-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #e5e7eb;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-        }
-        .mood-btn.selected {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
+        .modal-content { background: white; border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .mood-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; background: white; }
+        .mood-btn.selected { border-color: var(--primary); background: var(--primary-light); }
         textarea {
             width: 100% !important;
             border: 1px solid #e5e7eb !important;
@@ -361,203 +120,147 @@
             resize: none !important;
             outline: none !important;
             min-height: 150px !important;
+            text-indent: 0 !important;
             line-height: 1.4 !important;
-            font-family: inherit;
         }
         textarea:focus { border-color: var(--primary) !important; }
-
-        .save-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 12px;
-        }
-
-        .cancel-btn {
-            width: 100%;
-            padding: 14px;
-            background: none;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .view-content {
-            font-size: 16px;
-            line-height: 1.4;
-            color: #374151;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .action-btn {
-            font-size: 12px;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: none;
-        }
+        .save-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; margin-top: 12px; }
+        .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 16px 20px; padding-top: calc(env(safe-area-inset-top, 16px) + 16px); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+        .action-btn { font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: none; }
         .restore-btn { color: #10b981; background: #ecfdf5; }
         .perm-delete-btn { color: #ef4444; background: #fef2f2; }
+        .tab-bar { display: flex; background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 9; }
+        body.dark .tab-bar { background: #1f1f1f; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
 
-        .confirm-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.45);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
+        .more-btn {
+            background: none; border: none; font-size: 18px; color: #9ca3af;
+            cursor: pointer; padding: 8px 12px; border-radius: 8px;
+            letter-spacing: 2px;
         }
+        .more-btn:hover { background: #f3f4f6; color: #6b7280; }
+
+        .popup-menu {
+            display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+            background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            overflow: hidden; z-index: 999; min-width: 130px;
+        }
+        .popup-menu.show { display: block; }
+        .popup-menu-item {
+            display: block; padding: 14px 20px; font-size: 15px; cursor: pointer;
+            border: none; background: none; width: 100%; text-align: left; color: #374151;
+        }
+        .popup-menu-item:hover { background: #f9fafb; }
+        .popup-menu-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
+        .popup-menu-item.danger { color: #ef4444; }
+
+        .menu-wrapper { position: relative; display: inline-block; }
+
+        .theme-toggle {
+            background: none; border: none; color: white; font-size: 20px;
+            cursor: pointer; padding: 4px; border-radius: 8px;
+        }
+
+        .search-wrapper {
+            padding: 12px 16px; background: var(--primary-bg); position: sticky; top: 0; z-index: 8;
+        }
+        .search-box {
+            width: 100%; padding: 10px 16px; border: 1px solid #e5e7eb;
+            border-radius: 12px; font-size: 14px; outline: none; background: white;
+        }
+        .search-box:focus { border-color: var(--primary); }
+
+        .view-content { font-size: 16px; line-height: 1.4; color: #374151; white-space: pre-wrap; word-break: break-word; }
+
+        .confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
         .confirm-modal.active { display: flex; }
-        .confirm-modal-box {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            width: 80%;
-            max-width: 320px;
-            text-align: center;
-        }
+        .confirm-modal-box { background: white; border-radius: 16px; padding: 24px; width: 80%; max-width: 320px; text-align: center; }
         .confirm-modal-box p { font-size: 16px; margin-bottom: 20px; color: #374151; }
         .confirm-btns { display: flex; gap: 12px; }
-        .confirm-cancel {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-            background: #f3f4f6;
-            color: #374151;
-        }
-        .confirm-ok {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-            background: #ef4444;
-            color: white;
-        }
+        .confirm-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #f3f4f6; color: #374151; }
+        .confirm-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; cursor: pointer; background: #ef4444; color: white; }
 
         .lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--primary-bg);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary-bg); z-index: 9999; display: flex; align-items: center;
+            justify-content: center; flex-direction: column;
         }
         .lock-screen.hidden { display: none; }
         .lock-box {
-            background: white;
-            border-radius: 20px;
-            padding: 32px;
-            width: 85%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: white; border-radius: 20px; padding: 32px; width: 85%; max-width: 360px;
+            text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .lock-icon { font-size: 48px; margin-bottom: 16px; }
         .lock-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #374151; }
         .lock-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 24px; }
         .lock-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 16px;
-            outline: none;
-            text-align: center;
-            letter-spacing: 8px;
+            width: 100%; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px;
+            font-size: 16px; outline: none; text-align: center; letter-spacing: 8px;
             margin-bottom: 16px;
         }
         .lock-input:focus { border-color: var(--primary); }
         .lock-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
+            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer;
         }
         .lock-error { color: #ef4444; font-size: 13px; margin-top: 8px; min-height: 20px; }
         .lock-skip {
-            margin-top: 16px;
-            font-size: 13px;
-            color: #9ca3af;
-            cursor: pointer;
-            background: none;
-            border: none;
+            margin-top: 16px; font-size: 13px; color: #9ca3af; cursor: pointer;
+            background: none; border: none;
         }
 
-        /* Calendar */
-        .calendar-wrapper { padding: 16px; background: var(--primary-bg); }
+        .header-dots {
+            background: none; border: none; color: white; cursor: pointer;
+            padding: 6px 10px; border-radius: 8px; font-size: 18px; letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .header-dots:hover { background: rgba(255,255,255,0.2); }
+
+        .settings-menu {
+            display: none; position: absolute; top: 100%; right: 0; margin-top: 8px;
+            background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            overflow: hidden; z-index: 999; min-width: 160px;
+        }
+        .settings-menu.show { display: block; }
+        .settings-item {
+            display: block; padding: 14px 20px; font-size: 14px; cursor: pointer;
+            border: none; background: none; width: 100%; text-align: left; color: #374151;
+            white-space: nowrap;
+        }
+        .settings-item:hover { background: #f9fafb; }
+        .settings-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
+
+        .calendar-wrapper {
+            padding: 16px; background: var(--primary-bg);
+        }
         .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding: 0 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding: 0 8px;
         }
         .cal-header span { font-size: 17px; font-weight: 600; color: #374151; }
         .cal-nav {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px 12px;
-            border-radius: 8px;
-            color: var(--primary);
+            background: none; border: none; font-size: 20px; cursor: pointer;
+            padding: 4px 12px; border-radius: 8px; color: var(--primary);
         }
         .cal-nav:hover { background: rgba(var(--primary-rgb), 0.1); }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+        }
         .cal-weekday {
-            text-align: center;
-            font-size: 12px;
-            color: #9ca3af;
-            padding: 8px 0;
-            font-weight: 500;
+            text-align: center; font-size: 12px; color: #9ca3af; padding: 8px 0; font-weight: 500;
         }
         .cal-day {
-            text-align: center;
-            padding: 10px 0;
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
-            position: relative;
-            color: #374151;
+            text-align: center; padding: 10px 0; border-radius: 10px; font-size: 14px;
+            cursor: pointer; position: relative; color: #374151;
         }
         .cal-day:hover { background: var(--primary-light); }
         .cal-day.today { background: var(--primary-light); color: var(--primary); font-weight: 600; }
         .cal-day.has-diary::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--primary);
+            content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+            width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
         }
         .cal-day.selected { background: var(--primary) !important; color: white !important; }
         .cal-day.selected::after { background: white !important; }
@@ -565,40 +268,34 @@
         .cal-day-list { padding: 0 16px 100px; }
         .cal-day-title { font-size: 14px; color: #6b7280; margin-bottom: 12px; padding: 8px 0; }
 
-        /* Theme Picker */
         .theme-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 16px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px;
         }
         .theme-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 16px 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
+            border: 2px solid #e5e7eb; border-radius: 14px; padding: 16px 12px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
         }
         .theme-card:hover { transform: scale(1.03); }
-        .theme-card.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
-        }
+        .theme-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2); }
         .theme-color-preview {
-            width: 100%;
-            height: 40px;
-            border-radius: 10px;
-            margin-bottom: 8px;
+            width: 100%; height: 40px; border-radius: 10px; margin-bottom: 8px;
         }
         .theme-card span { font-size: 13px; font-weight: 500; color: #374151; }
 
-        /* 底部安全区域填充，防止底部回弹露白 */
-        .bottom-safe {
-            height: calc(80px + env(safe-area-inset-bottom, 0px));
-            background: var(--primary-bg);
+        .fab { padding-bottom: env(safe-area-inset-bottom, 0); bottom: calc(30px + env(safe-area-inset-bottom, 0px)); }
+
+        /* 顶部安全区域填充 - 防止下拉露白 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -100px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            z-index: 9;
+            pointer-events: none;
         }
-        body.dark .bottom-safe { background: #1a1a1a; }
     </style>
 </head>
 <body>
@@ -616,7 +313,6 @@
         </div>
     </div>
 
-    <!-- Header -->
     <div class="header">
         <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
         <h1>我的日记</h1>
@@ -633,14 +329,12 @@
         <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
     </div>
 
-    <!-- Tabs -->
     <div class="tab-bar">
         <div class="tab active" id="tab-diary" onclick="switchTab('diary')">📝 日记</div>
         <div class="tab" id="tab-calendar" onclick="switchTab('calendar')">📅 日历</div>
         <div class="tab" id="tab-trash" onclick="switchTab('trash')">🗑️ 回收站</div>
     </div>
 
-    <!-- Diary Page -->
     <div id="diary-page">
         <div class="search-wrapper">
             <input type="text" class="search-box" id="search-box" placeholder="🔍 搜索日记内容..." oninput="renderDiaries()">
@@ -650,7 +344,6 @@
         </div>
     </div>
 
-    <!-- Calendar Page -->
     <div id="calendar-page" style="display:none;">
         <div class="calendar-wrapper">
             <div class="cal-header">
@@ -666,7 +359,6 @@
         </div>
     </div>
 
-    <!-- Trash Page -->
     <div id="trash-page" style="padding: 16px 16px 100px; display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <p class="trash-info" style="font-size:13px; color:#9ca3af;">删除的日记将保留30天</p>
@@ -675,10 +367,8 @@
         <div id="trash-list"></div>
     </div>
 
-    <!-- FAB -->
     <button class="fab" id="fab-btn" onclick="openModal()">+</button>
 
-    <!-- Confirm Modal -->
     <div class="confirm-modal" id="confirm-modal">
         <div class="confirm-modal-box">
             <p id="confirm-msg">确定删除？</p>
@@ -689,7 +379,6 @@
         </div>
     </div>
 
-    <!-- View Modal -->
     <div class="modal" id="view-modal" onclick="if(event.target===this)closeViewModal()">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -697,11 +386,10 @@
                 <span id="view-mood" style="font-size:24px;"></span>
             </div>
             <div class="view-content" id="view-content"></div>
-            <button class="cancel-btn" onclick="closeViewModal()">关闭</button>
+            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:20px;" onclick="closeViewModal()">关闭</button>
         </div>
     </div>
 
-    <!-- Edit Modal -->
     <div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
         <div class="modal-content">
             <h2 style="font-size:18px; font-weight:600; margin-bottom:16px;" id="modal-title">写日记</h2>
@@ -716,11 +404,11 @@
             </div>
             <textarea id="diary-content" placeholder="今天发生了什么..."></textarea>
             <button class="save-btn" id="save-btn" onclick="saveDiary()">保存日记</button>
-            <button class="cancel-btn" onclick="closeModal()">取消</button>
+            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closeModal()">取消</button>
         </div>
     </div>
 
-    <!-- Password Modal -->
+    <!-- Password Change Modal -->
     <div class="modal" id="pwd-modal" onclick="if(event.target===this)closePwdModal()">
         <div class="modal-content" style="text-align:center;">
             <h2 style="font-size:18px; font-weight:600; margin-bottom:8px;">修改密码</h2>
@@ -729,22 +417,22 @@
             <input type="password" class="lock-input" id="new-pwd-confirm" maxlength="8" placeholder="确认密码" inputmode="numeric" style="margin-bottom:4px;">
             <div class="lock-error" id="pwd-error"></div>
             <button class="save-btn" onclick="saveNewPassword()" style="margin-top:12px;">保存密码</button>
-            <button class="cancel-btn" onclick="closePwdModal()">取消</button>
+            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:8px;" onclick="closePwdModal()">取消</button>
         </div>
     </div>
 
-    <!-- Theme Modal -->
+    <!-- Theme Picker Modal -->
     <div class="modal" id="theme-modal" onclick="if(event.target===this)closeThemePicker()">
         <div class="modal-content">
             <h2 style="font-size:18px; font-weight:600; margin-bottom:4px;">🎨 主题色卡</h2>
             <p style="font-size:14px; color:#9ca3af; margin-bottom:0;">选择你喜欢的莫兰迪色系</p>
             <div class="theme-grid" id="theme-grid"></div>
-            <button class="cancel-btn" onclick="closeThemePicker()" style="margin-top:16px;">关闭</button>
+            <button class="cancel-btn" style="width:100%; padding:14px; background:none; border:1px solid #e5e7eb; border-radius:12px; font-size:16px; cursor:pointer; margin-top:16px;" onclick="closeThemePicker()">关闭</button>
         </div>
     </div>
 
     <script>
-        // Prevent double tap zoom
+        // 禁止双击缩放
         document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
 
         var selectedMood = '';
@@ -753,14 +441,14 @@
         var weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
         var calYear, calMonth, calSelectedDate = null;
 
-        // Theme colors
+        // ===== Theme Colors =====
         var themeColors = [
             { id: 'purple', name: '默认紫', primary: '#7c3aed', dark: '#4f46e5', light: '#f3e8ff', bg: '#f0f2ff', rgb: '124,58,237' },
-            { id: 'smoky-blue', name: '烟灰蓝', primary: '#6e7c87', dark: '#566a76', light: '#eef1f2', bg: '#e4e7e8', rgb: '110,124,135' },
+            { id: 'smoky-blue', name: '煙灰藍', primary: '#6e7c87', dark: '#566a76', light: '#eef1f2', bg: '#e4e7e8', rgb: '110,124,135' },
             { id: 'soft-terracotta', name: '柔和陶土', primary: '#c19a8b', dark: '#a57d6e', light: '#f8f0ed', bg: '#f3edea', rgb: '193,154,139' },
             { id: 'creamy-apricot', name: '奶油杏', primary: '#e2c1ad', dark: '#c9a48e', light: '#fdf8f5', bg: '#faf3ef', rgb: '226,193,173' },
             { id: 'withered-rose', name: '枯玫瑰', primary: '#ad8e8e', dark: '#917373', light: '#f8f0f0', bg: '#f0e6e6', rgb: '173,142,142' },
-            { id: 'linen-gray', name: '亚麻灰', primary: '#b7b5ac', dark: '#9a9890', light: '#f6f6f4', bg: '#f1f1ee', rgb: '183,181,172' },
+            { id: 'linen-gray', name: '亞麻灰', primary: '#b7b5ac', dark: '#9a9890', light: '#f6f6f4', bg: '#f1f1ee', rgb: '183,181,172' },
             { id: 'blue', name: '雾霾蓝', primary: '#7B9BA6', dark: '#5E8290', light: '#e8f2f5', bg: '#f0f5f7', rgb: '123,155,166' },
             { id: 'pink', name: '豆沙粉', primary: '#B07B7B', dark: '#956060', light: '#f9f0f0', bg: '#f8f2f2', rgb: '176,123,123' },
             { id: 'peach', name: '蜜桃色', primary: '#C4907A', dark: '#A8735E', light: '#faf0eb', bg: '#f9f4f0', rgb: '196,144,122' },
@@ -773,41 +461,6 @@
             { id: 'mint', name: '薄荷绿', primary: '#b9dac4', dark: '#9ac4aa', light: '#f2f8f4', bg: '#edf5f0', rgb: '185,218,196' }
         ];
 
-        // 更新html背景色（纯色，用于iOS standalone回弹）
-        function updateHtmlBg() {
-            var isDark = document.body.classList.contains('dark');
-            if (isDark) {
-                document.documentElement.style.backgroundColor = '#1a1a1a';
-            } else {
-                // 使用当前主题的primary色作为回弹背景
-                var computedPrimary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-                document.documentElement.style.backgroundColor = computedPrimary || '#7c3aed';
-            }
-            // 同步更新theme-color meta
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) {
-                var color = isDark ? '#1a1a1a' : (getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#7c3aed');
-                meta.setAttribute('content', color);
-            }
-        }
-
-        // Load saved theme on init
-        (function loadTheme() {
-            var savedId = localStorage.getItem('diary_theme_color') || 'purple';
-            var theme = themeColors.find(function(t) { return t.id === savedId; });
-            if (theme) {
-                document.documentElement.style.setProperty('--primary', theme.primary);
-                document.documentElement.style.setProperty('--primary-dark', theme.dark);
-                document.documentElement.style.setProperty('--primary-light', theme.light);
-                document.documentElement.style.setProperty('--primary-bg', theme.bg);
-                document.documentElement.style.setProperty('--primary-rgb', theme.rgb);
-                document.documentElement.style.backgroundColor = theme.primary;
-                var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute('content', theme.primary);
-            }
-        })();
-
-        // Theme picker
         function openThemePicker() {
             closeSettings();
             var currentTheme = localStorage.getItem('diary_theme_color') || 'purple';
@@ -842,7 +495,9 @@
             document.documentElement.style.setProperty('--primary-rgb', theme.rgb);
 
             localStorage.setItem('diary_theme_color', themeId);
-            updateHtmlBg();
+
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', theme.primary);
 
             var cards = document.querySelectorAll('.theme-card');
             for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
@@ -852,6 +507,20 @@
                 document.body.classList.remove('theme-transitioning');
             }, 450);
         }
+
+        (function loadTheme() {
+            var savedId = localStorage.getItem('diary_theme_color') || 'purple';
+            var theme = themeColors.find(function(t) { return t.id === savedId; });
+            if (theme) {
+                document.documentElement.style.setProperty('--primary', theme.primary);
+                document.documentElement.style.setProperty('--primary-dark', theme.dark);
+                document.documentElement.style.setProperty('--primary-light', theme.light);
+                document.documentElement.style.setProperty('--primary-bg', theme.bg);
+                document.documentElement.style.setProperty('--primary-rgb', theme.rgb);
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', theme.primary);
+            }
+        })();
 
         // ===== Lock Screen =====
         (function initLock() {
@@ -996,7 +665,6 @@
             var isDark = document.body.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
-            updateHtmlBg();
             setTimeout(function() {
                 document.body.classList.remove('theme-transitioning');
             }, 450);
@@ -1006,7 +674,6 @@
                 document.body.classList.add('dark');
                 document.getElementById('theme-toggle').textContent = '☀️';
             }
-            updateHtmlBg();
         })();
 
         // ===== Confirm =====
@@ -1369,7 +1036,7 @@
             list.innerHTML = html;
         }
 
-        // Clean up expired trash
+        // Auto cleanup
         (function() {
             var trash = JSON.parse(localStorage.getItem('trash') || '[]');
             var now = Date.now();
@@ -1377,7 +1044,6 @@
             localStorage.setItem('trash', JSON.stringify(trash));
         })();
 
-        // Initial render
         renderDiaries();
     </script>
 </body>
